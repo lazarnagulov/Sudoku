@@ -5,22 +5,38 @@ Board::Board() {
 }
 Board::~Board() {}
 
-bool Board::IsValid() {
+bool Board::IsValid() const {
 	return false;
 }
-int Board::Get(int row, int col) {
+int Board::Get(int row, int col) const {
 	if (row >= 9 || row < 0 || col >= 9 || col < 0)
 		throw std::out_of_range("Index out of range in board");
 	return board[row * BOARD_SIZE + col];
 }
 
-int Board::operator ()(int row, int col) {
+int& Board::operator ()(int row, int col) {
 	return board[row * BOARD_SIZE + col];
 }
 
+const int Board::operator()(int row, int col) const {
+	return board[row * BOARD_SIZE + col];
+}
+
+
 std::istream& operator>>(std::istream& in, Board& board) {
+	for (int i = 0; i < Board::BOARD_SIZE; ++i) {
+		for (int j = 0; j < Board::BOARD_SIZE; ++j) {
+			in >> board(i, j);
+		}
+	}
 	return in;
 }
 std::ostream& operator<<(std::ostream& out, const Board& board) {
+	for (int i = 0; i < Board::BOARD_SIZE; ++i) {
+		for (int j = 0; j < Board::BOARD_SIZE; ++j) {
+			out << board(i, j) << ' ';
+		}
+		out << '\n';
+	}
 	return out;
 }

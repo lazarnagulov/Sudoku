@@ -8,10 +8,11 @@ public:
 	Board();
 	~Board();
 
-	bool IsValid();
+	bool IsValid() const;
 
-	int operator ()(int row, int col);
-	int Get(int row, int col);
+	int& operator()(int row, int col);
+	const int operator()(int row, int col) const;
+	int Get(int row, int col) const;
 
 	friend std::istream& operator>>(std::istream& in, Board& board);
 	friend std::ostream& operator<<(std::ostream& out, const Board& board);
