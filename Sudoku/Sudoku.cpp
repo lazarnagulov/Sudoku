@@ -1,3 +1,10 @@
+/// File: Sudoku.cpp
+/// 
+/// Definitions of Sudoku class.
+/// 
+///	Author: Lazar Nagulov 
+/// Last modified: 27.12.2023.
+
 #include <array>
 #include <bitset>
 #include <cstdlib>
@@ -71,9 +78,6 @@ static bool OptimizedBacktrackSolver(Board& board, std::array<std::bitset<9>, 9>
 
 
 void Sudoku::Solve() {
-    
-    //board.IsValid();
-#if 1
     std::array<std::bitset<Board::BOARD_SIZE>, Board::BOARD_SIZE> rowSet = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     std::array<std::bitset<Board::BOARD_SIZE>, Board::BOARD_SIZE> colSet = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     std::array<std::bitset<Board::BOARD_SIZE>, Board::BOARD_SIZE> blockSet = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -92,10 +96,6 @@ void Sudoku::Solve() {
     }
 
     OptimizedBacktrackSolver(board, rowSet, colSet, blockSet);
-#endif
-#if 0
-    BacktrackSolver(board);
-#endif
 }
 
 void Sudoku::Generate(Difficulty difficulty) {
@@ -107,9 +107,9 @@ void Sudoku::Generate(Difficulty difficulty) {
 
 
 std::ostream& operator<<(std::ostream& out, const Sudoku& sudoku) {
-    //out << "Round: " << sudoku.currentRound << '\n';
-    //out << "Correct: " << sudoku.correctCount << '\n';
-    //out << "Wrong: " << sudoku.wrongCount << '\n';
+    out << "Round: " << sudoku.currentRound << '\n';
+    out << "Correct: " << sudoku.correctCount << '\n';
+    out << "Wrong: " << sudoku.wrongCount << '\n';
     out << sudoku.board;
 	return out;
 }

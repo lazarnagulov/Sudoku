@@ -1,5 +1,13 @@
+/// File: Board.cpp
+/// 
+/// Definitions of Board class.
+/// 
+///	Author: Lazar Nagulov 
+/// Last modified: 27.12.2023.
+
 #include <unordered_set>
 #include <bitset>
+#include <random>
 
 #include "Board.h"
 
@@ -8,6 +16,12 @@ Board::Board() {
 }
 Board::~Board() {}
 
+/// <summary>
+/// Checks if current board is valid.
+/// </summary>
+/// <returns>
+///		(bool) true if current board is valid
+/// </returns>
 bool Board::IsValid() const {
 	std::unordered_set<int> rowSet;
 	std::unordered_set<int> colSet;
@@ -49,6 +63,13 @@ bool Board::IsValid() const {
 
 }
 
+
+/// <summary>
+///		Checks for errors in current board, prints them and counts them.
+/// </summary>
+/// <returns>
+///		Number of errors.
+/// </returns>
 int Board::CountErrors() const {
 	int result = 0;
 	std::unordered_set<int> rowSet;
@@ -90,7 +111,13 @@ int Board::CountErrors() const {
 	return result;
 }
 
-
+/// <summary>
+/// Checks if it is possible to put number 'number' in position ('row', 'col') in board.
+/// </summary>
+/// <param name="row">row index</param>
+/// <param name="col">column index</param>
+/// <param name="number">digit</param>
+/// <returns>true if it is possible to out number in ('row', 'col')</returns>
 bool Board::IsPossibleMove(int row, int col, int number) const {
 	for (int i = 0; i < Board::BOARD_SIZE; ++i) {
 		if (At(i, col) == number) {
@@ -113,20 +140,32 @@ bool Board::IsPossibleMove(int row, int col, int number) const {
 	return true;
 }
 
+/// <summary>
+/// Generates diagonal in empty board.
+/// </summary>
 void Board::GenerateDiagonal() {
 	for (int i = 0; i < BOARD_SIZE; i += 3) {
 		FillBlock(i, i);
 	}
 }
 
+/// <summary>
+/// Fills block with random generated values.
+/// </summary>
+/// <param name="row"> Block row (left corner of block) </param>
+/// <param name="col"> Block column (left corner of block) </param>
 void Board::FillBlock(int row, int col) {
+	std::random_device dev;
+	std::mt19937 rng(dev());
+	std::uniform_int_distribution<std::mt19937::result_type> random(1, 9);
+
 	std::bitset<BOARD_SIZE> blockSet;
 	int number = 0;
 	int idx = 0;
 	for (int i = 0; i < BLOCK_SIZE; ++i) {
 		for (int j = 0; j < BLOCK_SIZE; ++j) {
 			do {
-				number = (std::rand() % 9) + 1;
+				number = random(rng);
 				idx = number - 1;
 			} while (blockSet.test(idx));
 			At(row + i, col + j) = number;
@@ -135,6 +174,12 @@ void Board::FillBlock(int row, int col) {
 	}
 }
 
+/// <summary>
+/// Generates non diagonal elements in board.
+/// </summary>
+/// <param name="row">Starting row (most likely 0)</param>
+/// <param name="col">Starting column (most likely 0)</param>
+/// <returns></returns>
 bool Board::GenerateOther(int row, int col) {
 	if (col >= Board::BOARD_SIZE && row < Board::BOARD_SIZE - 1) {
 		row += 1;
@@ -174,9 +219,18 @@ bool Board::GenerateOther(int row, int col) {
 	return false;
 }
 
+
+/// <summary>
+/// Removes 'count' digits randomly from board.
+/// </summary>
+/// <param name="count">Number of digit to remove</param>
 void Board::RemoveDigit(int count) {
 	while (count) {
-		int block = (int)floor((float)(rand() / double(RAND_MAX) * BOARD_SIZE  * BOARD_SIZE + 1)) - 1;
+		std::random_device dev;
+		std::mt19937 rng(dev());
+		std::uniform_int_distribution<std::mt19937::result_type> random(0, 80);
+
+		int block = random(rng);
 		int row = block / BOARD_SIZE;
 		int col = block % BOARD_SIZE;
 		if (At(row, col) != 0) {
@@ -186,6 +240,12 @@ void Board::RemoveDigit(int count) {
 	}
 }
 
+/// <summary>
+/// Finds first empty place in board, staring with position ('row', 'col').
+/// </summary>
+/// <param name="row">String row</param>
+/// <param name="col">Staritng column</param>
+/// <returns></returns>
 bool Board::FindEmpty(int& row, int& col) {
 	for (row = 0; row < Board::BOARD_SIZE; ++row)
 		for (col = 0; col < Board::BOARD_SIZE; ++col)
@@ -194,21 +254,37 @@ bool Board::FindEmpty(int& row, int& col) {
 	return false;
 }
 
+/// <summary>
+/// Sets all elements in board to 0.
+/// </summary>
 void Board::Clear() {
 	memset(board, 0, sizeof(board));
 }
 
+/// <summary>
+/// Get reference of board element. Does bound checking.
+/// </summary>
+/// <param name="row"></param>
+/// <param name="col"></param>
+/// <returns>Reference to element in board</returns>
 int& Board::At(int row, int col) {
 	if (row >= 9 || row < 0 || col >= 9 || col < 0)
 		throw std::out_of_range("Error: Index out of range in board");
 	return board[row * BOARD_SIZE + col];
 }
 
+/// <summary>
+/// Get reference of board element. Does bound checking.
+/// </summary>
+/// <param name="row"></param>
+/// <param name="col"></param>
+/// <returns>Reference to element in board</returns>
 const int& Board::At(int row, int col) const {
 	if (row >= 9 || row < 0 || col >= 9 || col < 0)
 		throw std::out_of_range("Error: Index out of range in board");
 	return board[row * BOARD_SIZE + col];
 }
+
 
 const int& Board::operator()(int row, int col) const {
 	return board[row * BOARD_SIZE + col];
@@ -227,12 +303,35 @@ std::istream& operator>>(std::istream& in, Board& board) {
 	return in;
 }
 
-std::ostream& operator<<(std::ostream& out, const Board& board) {
+std::ofstream& operator<<(std::ofstream& out, const Board& board) {
 	for (int i = 0; i < Board::BOARD_SIZE; ++i) {
 		for (int j = 0; j < Board::BOARD_SIZE; ++j) {
 			out << board(i, j) << ' ';
 		}
 		out << "\n";
+	}
+	return out;
+}
+
+
+std::ostream& operator<<(std::ostream& out, const Board& board) {
+	for (int i = 0; i < Board::BOARD_SIZE; ++i) {
+		for (int j = 0; j < Board::BOARD_SIZE; ++j) {
+			if (board(i, j) == Board::EMPTY) {
+				out << Board::EMPTY_CHAR << ' ';
+			}
+			else {
+				out << board(i, j) << ' ';
+			}
+
+			if (j == 2 || j == 5) {
+				out << '|';
+			}
+		}
+		out << "\n";
+		if (i == 2 || i == 5) {
+			out << "- - - + - - - + - - -" << "\n";
+		}
 	}
 	return out;
 }

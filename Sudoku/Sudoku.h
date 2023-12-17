@@ -1,3 +1,9 @@
+/// File: Sudoku.h
+/// 
+/// Declarations of Sudoku class.   
+/// 
+///	Author: Lazar Nagulov 
+/// Last modified: 27.12.2023.
 #pragma once
 #include <fstream>
 
