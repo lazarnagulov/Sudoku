@@ -1,16 +1,32 @@
 #pragma once
+#include <fstream>
+
 #include "Board.h"
 
 class Sudoku {
 public:
+	enum Difficulty {
+		VERY_EASY = 17,
+		EASY = 35,
+		MEDIUM = 46,
+		HARD = 50,
+		VERY_HARD = 59,
+	};
+
 	Sudoku();
+	Sudoku(Board& board);
+	Sudoku(std::ifstream& in);
 	~Sudoku();
 
+	static void Run();
 	void Solve();
-	void Generate();
-	void Reset();
+	void Generate(Difficulty difficulty);
+
+	friend std::ostream& operator<<(std::ostream& out, const Sudoku& sudoku);
+	friend std::istream& operator>>(std::istream& in, Sudoku& sudoku);
 private:
-	bool IsPossibleMove(int row, int col, int number);
-private:
+	int currentRound;
+	int correctCount;
+	int wrongCount;
 	Board board;
 };
