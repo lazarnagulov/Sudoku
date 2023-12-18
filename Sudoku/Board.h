@@ -7,6 +7,7 @@
 /// Last modified: 27.12.2023.
 
 #pragma once
+#include <cmath>
 #include <iostream>
 #include <fstream>
 

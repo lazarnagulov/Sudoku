@@ -19,14 +19,55 @@ Sudoku::Sudoku(std::ifstream& in) : correctCount(0), wrongCount(0), currentRound
 Sudoku::~Sudoku() {}
 
 void Sudoku::Run() {
-	std::cout << "Welcome to Sudoku Solver!" << std::endl;
-	std::cout << "1 > Generate new Sudoku table" << std::endl;
-	std::cout << "2 > Load Sudoku table from file" << std::endl;
+    std::cout << std::endl;
+	std::cout << "Welcome to \"Sudokusphere\" Sudoku Solver!" << std::endl;
+	std::cout << "1 > Generate new Sudoku puzzle" << std::endl;
+	std::cout << "2 > Load Sudoku puzzle from file" << std::endl;
 	std::cout << "3 > Exit" << std::endl;
+
+    int ans;
+    std::cout << ">> ";
+    std::cin >> ans;
+    if (ans == 1) {
+        Generate(Difficulty::HARD);
+        std::cout << "Sudoku puzzle is generated!" << std::endl;
+        std::cout << *this << std::endl;
+        SolvingOptions();
+    }
+    else if (ans == 2) {
+        std::cerr << "Not implemented" << std::endl;
+    }
+    else if (ans == 3) {
+        exit(0);
+    }
+    else {
+        std::cerr << "Invalid command" << std::endl;
+        return;
+    }
+}
+
+void Sudoku::SolvingOptions() {
+    std::cout << "1 > Import solution" << std::endl;
+    std::cout << "2 > Solve" << std::endl;
+
+    int ans;
+    std::cout << ">> ";
+    std::cin >> ans;
+    if (ans == 1) {
+        std::cerr << "Not implemented" << std::endl;
+    }
+    else if (ans == 2) {
+        Solve();
+        std::cout << *this << std::endl;
+    }
+    else {
+        std::cerr << "Invalid command" << std::endl;
+    }
+    ++currentRound;
 }
 
 constexpr int GetBlock(int row, int col) {
-    return (row / 3) * 3 + col / 3;
+    return (row / Board::BLOCK_SIZE) * Board::BLOCK_SIZE + col / Board::BLOCK_SIZE;
 }
 
 static bool BacktrackSolver(Board& board) {
@@ -46,7 +87,9 @@ static bool BacktrackSolver(Board& board) {
     return false;
 }
 
-static bool OptimizedBacktrackSolver(Board& board, std::array<std::bitset<9>, 9>& rowSet, std::array<std::bitset<9>, 9>& colSet, std::array<std::bitset<9>, 9>& blockSet) {
+using BitArray = std::array<std::bitset<Board::BOARD_SIZE>, Board::BOARD_SIZE>;
+
+static bool Backtrack(Board& board, BitArray& rowSet, BitArray& colSet, BitArray& blockSet) {
     int row, col;
     if (!board.FindEmpty( row, col)) {
         return true;
@@ -64,7 +107,7 @@ static bool OptimizedBacktrackSolver(Board& board, std::array<std::bitset<9>, 9>
             rowSet[row].set(idx);
             colSet[col].set(idx);
             blockSet[block].set(idx);
-            if (OptimizedBacktrackSolver(board, rowSet, colSet, blockSet)) {
+            if (Backtrack(board, rowSet, colSet, blockSet)) {
                 return true;
             }
             rowSet[row].reset(idx);
@@ -77,10 +120,11 @@ static bool OptimizedBacktrackSolver(Board& board, std::array<std::bitset<9>, 9>
 }
 
 
+
 void Sudoku::Solve() {
-    std::array<std::bitset<Board::BOARD_SIZE>, Board::BOARD_SIZE> rowSet = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    std::array<std::bitset<Board::BOARD_SIZE>, Board::BOARD_SIZE> colSet = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    std::array<std::bitset<Board::BOARD_SIZE>, Board::BOARD_SIZE> blockSet = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    BitArray rowSet;
+    BitArray colSet;
+    BitArray blockSet;
 
     for (int row = 0; row < Board::BOARD_SIZE; ++row) {
         for (int col = 0; col < Board::BOARD_SIZE; ++col) {
@@ -95,7 +139,7 @@ void Sudoku::Solve() {
         }
     }
 
-    OptimizedBacktrackSolver(board, rowSet, colSet, blockSet);
+    Backtrack(board, rowSet, colSet, blockSet);
 }
 
 void Sudoku::Generate(Difficulty difficulty) {

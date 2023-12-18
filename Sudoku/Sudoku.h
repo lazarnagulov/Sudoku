@@ -12,11 +12,10 @@
 class Sudoku {
 public:
 	enum Difficulty {
-		VERY_EASY = 17,
-		EASY = 35,
-		MEDIUM = 46,
-		HARD = 50,
-		VERY_HARD = 59,
+		EASY = 40,
+		MEDIUM = 50,
+		HARD = 56,
+		VERY_HARD = 64,
 	};
 
 	Sudoku();
@@ -24,13 +23,17 @@ public:
 	Sudoku(std::ifstream& in);
 	~Sudoku();
 
-	static void Run();
+	void Run();
 	void Solve();
 	void Generate(Difficulty difficulty);
 
 	friend std::ostream& operator<<(std::ostream& out, const Sudoku& sudoku);
 	friend std::istream& operator>>(std::istream& in, Sudoku& sudoku);
 private:
+	void SolvingOptions();
+
+	std::ifstream inputFile;
+	std::ofstream outputFile;
 	int currentRound;
 	int correctCount;
 	int wrongCount;

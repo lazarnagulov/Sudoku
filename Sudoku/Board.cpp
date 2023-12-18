@@ -46,10 +46,10 @@ bool Board::IsValid() const {
 		}
 	}
 
-	for (int block = 0; block < 9; ++block) {
+	for (int block = 0; block < BOARD_SIZE; ++block) {
 		subMatrixSet.clear();
-		for (int i = block / 3 * 3; i < block / 3 * 3 + 3; ++i) {
-			for (int j = block % 3 * 3; j < block % 3 * 3 + 3; ++j) {
+		for (int i = block / BLOCK_SIZE * BLOCK_SIZE; i < block / BLOCK_SIZE * BLOCK_SIZE + BLOCK_SIZE; ++i) {
+			for (int j = block % BLOCK_SIZE * BLOCK_SIZE; j < block % BLOCK_SIZE * BLOCK_SIZE + BLOCK_SIZE; ++j) {
 				int current = At(i, j);
 				if (current != EMPTY && !subMatrixSet.insert(current).second) {
 					std::cerr << "Wrong: Duplicate number " << At(i,j) << " in block "  << block  << " at [" << i << ',' << j << "]"<< std::endl;
@@ -95,10 +95,10 @@ int Board::CountErrors() const {
 		}
 	}
 
-	for (int block = 0; block < 9; ++block) {
+	for (int block = 0; block < BOARD_SIZE; ++block) {
 		subMatrixSet.clear();
-		for (int i = block / 3 * 3; i < block / 3 * 3 + 3; ++i) {
-			for (int j = block % 3 * 3; j < block % 3 * 3 + 3; ++j) {
+		for (int i = block / BLOCK_SIZE * BLOCK_SIZE; i < block / BLOCK_SIZE * BLOCK_SIZE + BLOCK_SIZE; ++i) {
+			for (int j = block % BLOCK_SIZE  * BLOCK_SIZE; j < block % BLOCK_SIZE * BLOCK_SIZE + BLOCK_SIZE; ++j) {
 				int current = At(i, j);
 				if (current != EMPTY && !subMatrixSet.insert(current).second) {
 					std::cout << "Error: Duplicate number " << At(i, j) << " in block " << block << " at [" << i << ',' << j << "]" << std::endl;
@@ -127,11 +127,11 @@ bool Board::IsPossibleMove(int row, int col, int number) const {
 			return false;
 		}
 	}
-	int row0 = (row / 3) * 3;
-	int col0 = (col / 3) * 3;
+	int row0 = (row / BLOCK_SIZE) * BLOCK_SIZE;
+	int col0 = (col / BLOCK_SIZE) * BLOCK_SIZE;
 
-	for (int i = 0; i < 3; ++i) {
-		for (int j = 0; j < 3; ++j) {
+	for (int i = 0; i < BLOCK_SIZE; ++i) {
+		for (int j = 0; j < BLOCK_SIZE; ++j) {
 			if(At(row0 + i, col0 + j) == number){
 				return false;
 			}
@@ -144,7 +144,7 @@ bool Board::IsPossibleMove(int row, int col, int number) const {
 /// Generates diagonal in empty board.
 /// </summary>
 void Board::GenerateDiagonal() {
-	for (int i = 0; i < BOARD_SIZE; i += 3) {
+	for (int i = 0; i < BOARD_SIZE; i += BLOCK_SIZE) {
 		FillBlock(i, i);
 	}
 }
@@ -157,7 +157,7 @@ void Board::GenerateDiagonal() {
 void Board::FillBlock(int row, int col) {
 	std::random_device dev;
 	std::mt19937 rng(dev());
-	std::uniform_int_distribution<std::mt19937::result_type> random(1, 9);
+	std::uniform_int_distribution<std::mt19937::result_type> random(1, BOARD_SIZE);
 
 	std::bitset<BOARD_SIZE> blockSet;
 	int number = 0;
@@ -207,6 +207,7 @@ bool Board::GenerateOther(int row, int col) {
 			return true;
 		}
 	}
+
 	for (int number = 1; number <= Board::BOARD_SIZE; ++number) {
 		if (IsPossibleMove(row, col, number)) {
 			At(row, col) = number;
@@ -224,11 +225,11 @@ bool Board::GenerateOther(int row, int col) {
 /// Removes 'count' digits randomly from board.
 /// </summary>
 /// <param name="count">Number of digit to remove</param>
-void Board::RemoveDigit(int count) {
+void Board::RemoveNumber(int count) {
 	while (count) {
 		std::random_device dev;
 		std::mt19937 rng(dev());
-		std::uniform_int_distribution<std::mt19937::result_type> random(0, 80);
+		std::uniform_int_distribution<std::mt19937::result_type> random(0, BOARD_SIZE * BOARD_SIZE - 1);
 
 		int block = random(rng);
 		int row = block / BOARD_SIZE;
@@ -268,7 +269,7 @@ void Board::Clear() {
 /// <param name="col"></param>
 /// <returns>Reference to element in board</returns>
 int& Board::At(int row, int col) {
-	if (row >= 9 || row < 0 || col >= 9 || col < 0)
+	if (row >= BOARD_SIZE || row < 0 || col >= BOARD_SIZE || col < 0)
 		throw std::out_of_range("Error: Index out of range in board");
 	return board[row * BOARD_SIZE + col];
 }
@@ -280,7 +281,7 @@ int& Board::At(int row, int col) {
 /// <param name="col"></param>
 /// <returns>Reference to element in board</returns>
 const int& Board::At(int row, int col) const {
-	if (row >= 9 || row < 0 || col >= 9 || col < 0)
+	if (row >= BOARD_SIZE || row < 0 || col >= BOARD_SIZE || col < 0)
 		throw std::out_of_range("Error: Index out of range in board");
 	return board[row * BOARD_SIZE + col];
 }
@@ -324,14 +325,14 @@ std::ostream& operator<<(std::ostream& out, const Board& board) {
 				out << board(i, j) << ' ';
 			}
 
-			if (j == 2 || j == 5) {
-				out << '|';
-			}
+			//if (j == 2 || j == 5) {
+				//out << '|';
+			//}
 		}
 		out << "\n";
-		if (i == 2 || i == 5) {
-			out << "- - - + - - - + - - -" << "\n";
-		}
+		//if (i == 2 || i == 5) {
+			//out << "- - - + - - - + - - -" << "\n";
+		//}
 	}
 	return out;
 }
