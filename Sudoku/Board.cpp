@@ -3,7 +3,7 @@
 /// Definitions of Board class.
 /// 
 ///	Author: Lazar Nagulov 
-/// Last modified: 27.12.2023.
+/// Last modified: 19.12.2023.
 
 #include <unordered_set>
 #include <bitset>
@@ -20,7 +20,7 @@ Board::~Board() {}
 /// Checks if current board is valid.
 /// </summary>
 /// <returns>
-///		(bool) true if current board is valid
+///		true if current board is valid
 /// </returns>
 bool Board::IsValid() const {
 	std::unordered_set<int> rowSet;
@@ -52,7 +52,7 @@ bool Board::IsValid() const {
 			for (int j = block % BLOCK_SIZE * BLOCK_SIZE; j < block % BLOCK_SIZE * BLOCK_SIZE + BLOCK_SIZE; ++j) {
 				int current = At(i, j);
 				if (current != EMPTY && !subMatrixSet.insert(current).second) {
-					std::cerr << "Wrong: Duplicate number " << At(i,j) << " in block "  << block  << " at [" << i << ',' << j << "]"<< std::endl;
+					std::cerr << "Error: Duplicate number " << At(i,j) << " in block "  << block  << " at [" << i << ',' << j << "]"<< std::endl;
 					return false;
 				}
 			}
@@ -60,7 +60,40 @@ bool Board::IsValid() const {
 	}
 
 	return true;
+}
 
+constexpr int Board::GetBlock(int row, int col) {
+	return (row / Board::BLOCK_SIZE) * Board::BLOCK_SIZE + col / Board::BLOCK_SIZE;
+}
+
+bool Board::Backtrack(BitArray& rowSet, BitArray& colSet, BitArray& blockSet) {
+	int row, col;
+	if (!FindEmpty(row, col)) {
+		return true;
+	}
+	int block = GetBlock(row, col);
+	std::bitset<BOARD_SIZE> contains = rowSet[row] | colSet[col] | blockSet[block];
+	if (contains.all()) {
+		return false;
+	}
+
+	for (int number = 1; number <= BOARD_SIZE; ++number) {
+		int idx = number - 1;
+		if (!contains[idx]) {
+			At(row, col) = number;
+			rowSet[row].set(idx);
+			colSet[col].set(idx);
+			blockSet[block].set(idx);
+			if (Backtrack(rowSet, colSet, blockSet)) {
+				return true;
+			}
+			rowSet[row].reset(idx);
+			colSet[col].reset(idx);
+			blockSet[block].reset(idx);
+		}
+	}
+	At(row, col) = 0;
+	return false;
 }
 
 
@@ -70,7 +103,7 @@ bool Board::IsValid() const {
 /// <returns>
 ///		Number of errors.
 /// </returns>
-int Board::CountErrors() const {
+int Board::CountErrors(const Board& checking) const {
 	int result = 0;
 	std::unordered_set<int> rowSet;
 	std::unordered_set<int> colSet;
@@ -82,12 +115,20 @@ int Board::CountErrors() const {
 		for (int j = 0; j < BOARD_SIZE; ++j) {
 			int currentRow = At(i, j);
 			int currentCol = At(j, i);
+			int originalRow = checking(i, j);
+			int originalCol = checking(j, i);
+			if (originalRow != EMPTY && currentRow != originalRow) {
+				std::cout << "Wrong: Value changed from original " << originalRow << "->" << currentRow << " at [" << i << ',' << j << "]" << std::endl;
+			}
+			if (originalCol != EMPTY && currentCol != originalCol) {
+				std::cout << "Wrong: Value changed from original " << originalCol << "->" << currentCol << " at [" << j << ',' << i << "]" << std::endl;
+			}
 			if (currentRow != EMPTY && !rowSet.insert(currentRow).second) {
-				std::cout << "Wrong: Duplicate number " << At(i, j) << " in row " << i << " at [" << i << ',' << j << "]" << std::endl;
+				std::cout << "Wrong: Duplicate number (row " << i << ") " << checking(i, j) << " at [" << i << ',' << j << "]" << std::endl;
 				++result;
 			}
 			if (currentCol != EMPTY && !colSet.insert(currentCol).second) {
-				std::cout << "Wrong: Duplicate number " << At(j, i) << " in colomn " << i << " at [" << j << ',' << i << "]" << std::endl;
+				std::cout << "Wrong: Duplicate number (column " << i << ") " << checking(j, i) << " at [" << j << ',' << i << "]" << std::endl;
 				++result;
 			}
 			rowSet.insert(currentRow);
@@ -98,15 +139,16 @@ int Board::CountErrors() const {
 	for (int block = 0; block < BOARD_SIZE; ++block) {
 		subMatrixSet.clear();
 		for (int i = block / BLOCK_SIZE * BLOCK_SIZE; i < block / BLOCK_SIZE * BLOCK_SIZE + BLOCK_SIZE; ++i) {
-			for (int j = block % BLOCK_SIZE  * BLOCK_SIZE; j < block % BLOCK_SIZE * BLOCK_SIZE + BLOCK_SIZE; ++j) {
-				int current = At(i, j);
+			for (int j = block % BLOCK_SIZE * BLOCK_SIZE; j < block % BLOCK_SIZE * BLOCK_SIZE + BLOCK_SIZE; ++j) {
+				int current = checking(i, j);
 				if (current != EMPTY && !subMatrixSet.insert(current).second) {
-					std::cout << "Error: Duplicate number " << At(i, j) << " in block " << block << " at [" << i << ',' << j << "]" << std::endl;
+					std::cout << "Wrong: Duplicate number " << checking(i, j) << " in block " << block << " at [" << i << ',' << j << "]" << std::endl;
 					++result;
 				}
 			}
 		}
 	}
+
 
 	return result;
 }
@@ -181,15 +223,18 @@ void Board::FillBlock(int row, int col) {
 /// <param name="col">Starting column (most likely 0)</param>
 /// <returns></returns>
 bool Board::GenerateOther(int row, int col) {
+	// Last column?
 	if (col >= Board::BOARD_SIZE && row < Board::BOARD_SIZE - 1) {
 		row += 1;
 		col = 0;
 	}
 
+	// End?
 	if (row >= Board::BOARD_SIZE && col >= Board::BOARD_SIZE) {
 		return true;
 	}
 
+	// Generate blocks first.
 	if (row < BLOCK_SIZE) {
 		if (col < BLOCK_SIZE) {
 			col = BLOCK_SIZE;
@@ -208,6 +253,7 @@ bool Board::GenerateOther(int row, int col) {
 		}
 	}
 
+	// Solve board with backtracking.
 	for (int number = 1; number <= Board::BOARD_SIZE; ++number) {
 		if (IsPossibleMove(row, col, number)) {
 			At(row, col) = number;
@@ -298,24 +344,21 @@ int& Board::operator()(int row, int col) {
 std::istream& operator>>(std::istream& in, Board& board) {
 	for (int i = 0; i < Board::BOARD_SIZE; ++i) {
 		for (int j = 0; j < Board::BOARD_SIZE; ++j) {
-			in >> board(i, j);
+			char field;
+			in >> field;
+			if (field == Board::EMPTY_CHAR) {
+				board(i, j) = 0;
+			}
+			else {
+				board(i, j) = field - '0';
+			}
 		}
 	}
+
 	return in;
 }
 
 std::ofstream& operator<<(std::ofstream& out, const Board& board) {
-	for (int i = 0; i < Board::BOARD_SIZE; ++i) {
-		for (int j = 0; j < Board::BOARD_SIZE; ++j) {
-			out << board(i, j) << ' ';
-		}
-		out << "\n";
-	}
-	return out;
-}
-
-
-std::ostream& operator<<(std::ostream& out, const Board& board) {
 	for (int i = 0; i < Board::BOARD_SIZE; ++i) {
 		for (int j = 0; j < Board::BOARD_SIZE; ++j) {
 			if (board(i, j) == Board::EMPTY) {
@@ -324,15 +367,30 @@ std::ostream& operator<<(std::ostream& out, const Board& board) {
 			else {
 				out << board(i, j) << ' ';
 			}
-
-			//if (j == 2 || j == 5) {
-				//out << '|';
-			//}
 		}
 		out << "\n";
-		//if (i == 2 || i == 5) {
-			//out << "- - - + - - - + - - -" << "\n";
-		//}
+	}
+	return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const Board& board) {
+	for (int i = 0; i < Board::BOARD_SIZE; ++i) {
+		for (int j = 0; j < Board::BOARD_SIZE; ++j) {
+			if (board(i, j) == Board::EMPTY) {
+				out << Board::EMPTY_CHAR << ' ';
+			}
+			else {
+				out << board(i, j) << " ";
+			}
+
+			if ((j + 1) % Board::BLOCK_SIZE == 0 && j < Board::BOARD_SIZE - 1) {
+				out << "| ";
+			}
+		}
+		out << "\n";
+		if ((i + 1) % Board::BLOCK_SIZE == 0 && i < Board::BOARD_SIZE - 1) {
+			out << "------+-------+------\n";
+		}
 	}
 	return out;
 }
