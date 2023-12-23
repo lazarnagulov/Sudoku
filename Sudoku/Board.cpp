@@ -1,9 +1,9 @@
-/// File: Board.cpp
+/// Board.cpp
 /// 
 /// Definitions of Board class.
 /// 
 ///	Author: Lazar Nagulov 
-/// Last modified: 19.12.2023.
+/// Last modified: 23th December 2023
 
 #include <unordered_set>
 #include <bitset>
@@ -16,12 +16,6 @@ Board::Board() {
 }
 Board::~Board() {}
 
-/// <summary>
-/// Checks if current board is valid.
-/// </summary>
-/// <returns>
-///		true if current board is valid
-/// </returns>
 bool Board::IsValid() const {
 	std::unordered_set<int> rowSet;
 	std::unordered_set<int> colSet;
@@ -38,7 +32,7 @@ bool Board::IsValid() const {
 				return false;
 			}
 			if (currentCol != EMPTY && !colSet.insert(currentCol).second) {
-				std::cerr << "Error: Duplicate number " << At(j,i) << " in colomn " << i << " at [" << j << ',' << i << "]" << std::endl;
+				std::cerr << "Error: Duplicate number " << At(j,i) << " in column " << i << " at [" << j << ',' << i << "]" << std::endl;
 				return false;
 			}
 			rowSet.insert(currentRow);
@@ -97,12 +91,6 @@ bool Board::Backtrack(BitArray& rowSet, BitArray& colSet, BitArray& blockSet) {
 }
 
 
-/// <summary>
-///		Checks for errors in current board, prints them and counts them.
-/// </summary>
-/// <returns>
-///		Number of errors.
-/// </returns>
 int Board::CountErrors(const Board& checking) const {
 	int result = 0;
 	std::unordered_set<int> rowSet;
@@ -115,20 +103,12 @@ int Board::CountErrors(const Board& checking) const {
 		for (int j = 0; j < BOARD_SIZE; ++j) {
 			int currentRow = At(i, j);
 			int currentCol = At(j, i);
-			int originalRow = checking(i, j);
-			int originalCol = checking(j, i);
-			if (originalRow != EMPTY && currentRow != originalRow) {
-				std::cout << "Wrong: Value changed from original " << originalRow << "->" << currentRow << " at [" << i << ',' << j << "]" << std::endl;
-			}
-			if (originalCol != EMPTY && currentCol != originalCol) {
-				std::cout << "Wrong: Value changed from original " << originalCol << "->" << currentCol << " at [" << j << ',' << i << "]" << std::endl;
-			}
 			if (currentRow != EMPTY && !rowSet.insert(currentRow).second) {
-				std::cout << "Wrong: Duplicate number (row " << i << ") " << checking(i, j) << " at [" << i << ',' << j << "]" << std::endl;
+				std::cerr << "Error: Duplicate number " << At(i, j) << " in row " << i << " at [" << i << ',' << j << "]" << std::endl;
 				++result;
 			}
 			if (currentCol != EMPTY && !colSet.insert(currentCol).second) {
-				std::cout << "Wrong: Duplicate number (column " << i << ") " << checking(j, i) << " at [" << j << ',' << i << "]" << std::endl;
+				std::cerr << "Error: Duplicate number " << At(j, i) << " in column " << i << " at [" << j << ',' << i << "]" << std::endl;
 				++result;
 			}
 			rowSet.insert(currentRow);
@@ -140,26 +120,19 @@ int Board::CountErrors(const Board& checking) const {
 		subMatrixSet.clear();
 		for (int i = block / BLOCK_SIZE * BLOCK_SIZE; i < block / BLOCK_SIZE * BLOCK_SIZE + BLOCK_SIZE; ++i) {
 			for (int j = block % BLOCK_SIZE * BLOCK_SIZE; j < block % BLOCK_SIZE * BLOCK_SIZE + BLOCK_SIZE; ++j) {
-				int current = checking(i, j);
+				int current = At(i, j);
 				if (current != EMPTY && !subMatrixSet.insert(current).second) {
-					std::cout << "Wrong: Duplicate number " << checking(i, j) << " in block " << block << " at [" << i << ',' << j << "]" << std::endl;
+					std::cerr << "Error: Duplicate number " << At(i, j) << " in block " << block << " at [" << i << ',' << j << "]" << std::endl;
 					++result;
 				}
 			}
 		}
 	}
 
-
 	return result;
 }
 
-/// <summary>
-/// Checks if it is possible to put number 'number' in position ('row', 'col') in board.
-/// </summary>
-/// <param name="row">row index</param>
-/// <param name="col">column index</param>
-/// <param name="number">digit</param>
-/// <returns>true if it is possible to out number in ('row', 'col')</returns>
+
 bool Board::IsPossibleMove(int row, int col, int number) const {
 	for (int i = 0; i < Board::BOARD_SIZE; ++i) {
 		if (At(i, col) == number) {
@@ -182,21 +155,14 @@ bool Board::IsPossibleMove(int row, int col, int number) const {
 	return true;
 }
 
-/// <summary>
-/// Generates diagonal in empty board.
-/// </summary>
 void Board::GenerateDiagonal() {
 	for (int i = 0; i < BOARD_SIZE; i += BLOCK_SIZE) {
 		FillBlock(i, i);
 	}
 }
 
-/// <summary>
-/// Fills block with random generated values.
-/// </summary>
-/// <param name="row"> Block row (left corner of block) </param>
-/// <param name="col"> Block column (left corner of block) </param>
 void Board::FillBlock(int row, int col) {
+	// Generate random number from 1 to BOAD_SIZE.
 	std::random_device dev;
 	std::mt19937 rng(dev());
 	std::uniform_int_distribution<std::mt19937::result_type> random(1, BOARD_SIZE);
@@ -216,12 +182,6 @@ void Board::FillBlock(int row, int col) {
 	}
 }
 
-/// <summary>
-/// Generates non diagonal elements in board.
-/// </summary>
-/// <param name="row">Starting row (most likely 0)</param>
-/// <param name="col">Starting column (most likely 0)</param>
-/// <returns></returns>
 bool Board::GenerateOther(int row, int col) {
 	// Last column?
 	if (col >= Board::BOARD_SIZE && row < Board::BOARD_SIZE - 1) {
@@ -266,13 +226,9 @@ bool Board::GenerateOther(int row, int col) {
 	return false;
 }
 
-
-/// <summary>
-/// Removes 'count' digits randomly from board.
-/// </summary>
-/// <param name="count">Number of digit to remove</param>
 void Board::RemoveNumber(int count) {
 	while (count) {
+		// Generate random number from 0 to BOAD_SIZE^2 - 1.
 		std::random_device dev;
 		std::mt19937 rng(dev());
 		std::uniform_int_distribution<std::mt19937::result_type> random(0, BOARD_SIZE * BOARD_SIZE - 1);
@@ -287,12 +243,6 @@ void Board::RemoveNumber(int count) {
 	}
 }
 
-/// <summary>
-/// Finds first empty place in board, staring with position ('row', 'col').
-/// </summary>
-/// <param name="row">String row</param>
-/// <param name="col">Staritng column</param>
-/// <returns></returns>
 bool Board::FindEmpty(int& row, int& col) {
 	for (row = 0; row < Board::BOARD_SIZE; ++row)
 		for (col = 0; col < Board::BOARD_SIZE; ++col)
@@ -301,37 +251,22 @@ bool Board::FindEmpty(int& row, int& col) {
 	return false;
 }
 
-/// <summary>
-/// Sets all elements in board to 0.
-/// </summary>
+
 void Board::Clear() {
 	memset(board, 0, sizeof(board));
 }
 
-/// <summary>
-/// Get reference of board element. Does bound checking.
-/// </summary>
-/// <param name="row"></param>
-/// <param name="col"></param>
-/// <returns>Reference to element in board</returns>
 int& Board::At(int row, int col) {
 	if (row >= BOARD_SIZE || row < 0 || col >= BOARD_SIZE || col < 0)
 		throw std::out_of_range("Error: Index out of range in board");
 	return board[row * BOARD_SIZE + col];
 }
 
-/// <summary>
-/// Get reference of board element. Does bound checking.
-/// </summary>
-/// <param name="row"></param>
-/// <param name="col"></param>
-/// <returns>Reference to element in board</returns>
 const int& Board::At(int row, int col) const {
 	if (row >= BOARD_SIZE || row < 0 || col >= BOARD_SIZE || col < 0)
 		throw std::out_of_range("Error: Index out of range in board");
 	return board[row * BOARD_SIZE + col];
 }
-
 
 const int& Board::operator()(int row, int col) const {
 	return board[row * BOARD_SIZE + col];
@@ -341,6 +276,13 @@ int& Board::operator()(int row, int col) {
 	return board[row * BOARD_SIZE + col];
 }
 
+/// <summary>
+/// Reads the contents of a Sudoku board from the input stream and updates the provided Board object.
+/// Expects characters representing the Sudoku grid, with '0' for empty cells.
+/// </summary>
+/// <param name="in">Reference to the input stream.</param>
+/// <param name="board">Reference to the Board object to be updated.</param>
+/// <returns>Reference to the input stream after reading the board.</returns>
 std::istream& operator>>(std::istream& in, Board& board) {
 	for (int i = 0; i < Board::BOARD_SIZE; ++i) {
 		for (int j = 0; j < Board::BOARD_SIZE; ++j) {
@@ -358,6 +300,13 @@ std::istream& operator>>(std::istream& in, Board& board) {
 	return in;
 }
 
+/// <summary>
+/// Writes the contents of a board to the output file stream.
+/// Empty cells are represented by the designated empty character.
+/// </summary>
+/// <param name="out">Reference to the output file stream.</param>
+/// <param name="board">Reference to the const Board object to be written.</param>
+/// <returns>Reference to the output file stream after writing the board.</returns>
 std::ofstream& operator<<(std::ofstream& out, const Board& board) {
 	for (int i = 0; i < Board::BOARD_SIZE; ++i) {
 		for (int j = 0; j < Board::BOARD_SIZE; ++j) {
@@ -373,6 +322,14 @@ std::ofstream& operator<<(std::ofstream& out, const Board& board) {
 	return out;
 }
 
+/// <summary>
+/// Writes the formatted contents of a board to the output stream.
+/// Empty cells are represented by the designated empty character.
+/// The output includes horizontal and vertical separators to create a visual representation of the grid.
+/// </summary>
+/// <param name="out">Reference to the output stream.</param>
+/// <param name="board">Reference to the const Board object to be written.</param>
+/// <returns>Reference to the output stream after writing the formatted board.</returns>
 std::ostream& operator<<(std::ostream& out, const Board& board) {
 	for (int i = 0; i < Board::BOARD_SIZE; ++i) {
 		for (int j = 0; j < Board::BOARD_SIZE; ++j) {

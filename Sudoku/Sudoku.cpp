@@ -1,27 +1,28 @@
-/// File: Sudoku.cpp
+/// Sudoku.cpp
 /// 
-/// Definitions of Sudoku class.
-/// Main class that operates with Board class and provied user interface.
+/// Definitions for the Sudoku class, the main class operating with the Board class and providing a user interface.
 /// 
-///	Author: Lazar Nagulov 
-/// Last modified: 23.12.2023.
+/// Author: Lazar Nagulov
+/// Last modified: 23rd December 2023.
 
 #include <array>
 #include <bitset>
 #include <string>
 #include <cstdlib>
 
-#include "Sudoku.h"
+#include "Sudoku.h"5
 #include "Timer.h"
 
-
+/// <summary>
+/// Main constructor for Sudoku class.
+/// </summary>
+/// <param name="inputFile"> Input file name</param>
+/// <param name="outputFile"> Output file name</param>
 Sudoku::Sudoku(std::string& inputFile, std::string& outputFile)
     : correctCount(0), wrongCount(0), currentRound(1), emptyCount(0), inputFile(inputFile), outputFile(outputFile) {}
 Sudoku::~Sudoku() {}
 
-/// <summary>
-/// Runs a main game loop.
-/// </summary>
+
 void Sudoku::Run() {
     while (true) {
         std::cout << std::endl;
@@ -63,10 +64,6 @@ void Sudoku::Run() {
     }
 }
 
-
-/// <summary>
-/// Gives user a solving options.
-/// </summary>
 void Sudoku::SolvingOptions() {
     std::cout << "1 > Import solution" << std::endl;
     std::cout << "2 > Solve" << std::endl;
@@ -76,19 +73,10 @@ void Sudoku::SolvingOptions() {
     std::cout << ">> ";
     std::cin >> ans;
     if (ans == 1) {
-        std::ifstream in(inputFile);
-        CheckSolution(in);
-        in.close();
+        CheckSolution();
     }
     else if (ans == 2) {
-        std::ofstream out(outputFile);
-        Board curr = board;
         Solve();
-        wrongCount = board.CountErrors(curr);
-        correctCount = Board::BOARD_SIZE * Board::BOARD_SIZE - emptyCount - wrongCount;
-        out << board;
-        std::cout << *this << std::endl;
-        out.close();
     }
     else if (ans == 3) {
         exit(0);
@@ -99,23 +87,16 @@ void Sudoku::SolvingOptions() {
     ++currentRound;
 }
 
-
-/// <summary>
-/// Checks if solution provided by user.
-/// Prints an error and total error count.
-/// </summary>
-/// <param name="in">
-/// Solution input file.
-/// </param>
-void Sudoku::CheckSolution(std::ifstream& in) {
+void Sudoku::CheckSolution() {
+    std::ifstream in(inputFile);
     Board loaded;
     in >> loaded;
+
     std::cout << "Imported solution" << std::endl;
     std::cout << loaded;
-    wrongCount = board.CountErrors(loaded);
-    correctCount = Board::BOARD_SIZE * Board::BOARD_SIZE - emptyCount - wrongCount;
-    std::cout << "Wrong: " << wrongCount << std::endl;
-    std::cout << "Correct: " << correctCount << std::endl;
+    
+    wrongCount = loaded.CountErrors(board);
+    std::cout << *this << std::endl;
 }
 
 
@@ -137,7 +118,8 @@ static bool Backtrack(Board& board) {
 }
 
 /// <summary>
-/// Solves sudoku puzzle using optimized Backtracking algorithm.
+/// Solves the current state of the Sudoku puzzle using a backtracking algorithm.
+/// The solved puzzle is written to the specified output file.
 /// </summary>
 void Sudoku::Solve() {
     Board::BitArray rowSet;
@@ -158,29 +140,32 @@ void Sudoku::Solve() {
     }
 
     board.Backtrack(rowSet, colSet, blockSet);
+ 
+    std::ofstream out(outputFile);
+    out << board;
 }
 
 /// <summary>
-/// Generates puzzle with given difficulty.
+/// Generates a Sudoku puzzle with the specified difficulty level.
 /// </summary>
-/// <param name="difficulty">
-/// Puzzle difficulty
-/// </param>
+/// <param name="difficulty">Difficulty level of the Sudoku puzzle.</param>
 void Sudoku::Generate(Difficulty difficulty) {
     board.Clear();
     emptyCount = difficulty;
     board.GenerateDiagonal();
-    std::cout << board << std::endl;
     board.GenerateOther(0,0);
-    std::cout << board << std::endl;;
     board.RemoveNumber(difficulty);
-    std::cout << board << std::endl;;
 }
 
+/// <summary>
+/// Writes the current state of a Sudoku game, including the round number, correct and wrong counts, to the output stream.
+/// </summary>
+/// <param name="out">Reference to the output stream.</param>
+/// <param name="sudoku">Reference to the const Sudoku object to be written.</param>
+/// <returns>Reference to the output stream after writing the game state.</returns>
 std::ostream& operator<<(std::ostream& out, const Sudoku& sudoku) {
     out << "Round: " << sudoku.currentRound << '\n';
     out << "Correct: " << sudoku.correctCount << '\n';
     out << "Wrong: " << sudoku.wrongCount << '\n';
-    out << sudoku.board;
 	return out;
 }
