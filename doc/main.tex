@@ -64,15 +64,15 @@
 
     \rhead{2. Analiza problema}
     \section{Analiza problema}
-    \par Glavni problem zadatka je mogućnost rešavanja zagonetke, jer nam je algoritam za rešavanju zagonetke neophodan za generisanje iste.
-    Najčešći način koji se koristi u rešavanju zagonetke je isprobavajući svaka moguća rešenja. Sam algoritam je rekurzivan, što može da dovede do 
-    prelivanja steka (eng. Stack overflow), što znači da moramo da umanjivo broj mogućih rekurzivnih poziva.
-    \par Pozitivna strana ovoga algoritma koji pokušava sve mogućnosti je sigurno pronalaženje rešenja za svaku zagonetku (ukoliko ono postoji) i što u osnovi ne koristi dodatne strukture podataka izuzev same tabele.
-    Nažalost, za uveđenje optimizacije neophodno je zauzeti veći deo memorije za pomoćne strukture, poput haš tabele ukoliko želimo da ubacimo heruistiku - praćenje pojavljivanje brojeva, ili niz bitova
-    ukoliko želimo da brzo proverimo da li je moguće postaviti broj u određeno polje. Primetimo da prethodne ideje za optimizaciju zahtevaju prolazak kroz čitavu tabelu pre samog algoritma za rešavanje,
-    što može biti skupo za jednostavne zagonetke.
-    \par Za potrebe projekta, uvedena je optimizacija koja ubrzava proveru da li je moguće postaviti broj u dato polje. Ideje za dalju optimizaciju su ovođene prethodno navedene heruistike ili
-    korišćene nekih od probalističkih algoritama, poput Knutovog algoritma (eng. Knuth's Algorithm). 
+    \par Glavni problem zadatka je mogućnost rešavanja zagonetke, jer nam je algoritam za rešavanju zagonetke neophodan za generisanje iste. Takođe je potrebna provera
+    validnosti unete zagonetke. Prvo ćemo razmotriti probleme rešavanja zagonetke, pa onda problem validacije.
+    \par Najčešći način koji se koristi u rešavanju zagonetke je isprobavajući svaka moguća rešenja. Broj mogućnosti da se prazna polja eksponencijalno zavisi od broja praznih polja, pa je
+    neophodno da razmotrimo mogućnosti optimizacije algoritma. Sam algoritam je rekurzivan, što može da dovede do 
+    prelivanja steka (eng. Stack overflow). Znači da moramo da umanjivo broj mogućih rekurzivnih poziva. Pozitivna strana je sigurno pronalaženje 
+    rešenja za svaku zagonetku (ukoliko ono postoji) i što u osnovi ne koristimo dodatne strukture podataka izuzev same tabele. Nažalost, za uvođenje bilo kakvih optimizacija neophodno je
+    dodatno zauzeće memorije.
+    \par Za potrebe validiranja postavlja se pitane „Šta se ubraja u greške?". Na primer, ako je broj u tabeli duplikat u koloni i u redu, koliko se tačno nalazi grešaka u tabeli?
+    U našem slučaju, ukoliko naiđemo na broj koji je duplikat, on se uklanja iz tabele (sem ako nije bio u originalnoj zagonetci, onda se uklanja prethodni broj sa istom vrednošću).
     \par Takođe moramo razmotriti mogućnosti generisanje pseudoslučajnih brojeva za generisanje tabele. Primećujemo da korišćenjem obične random funkcije često generiše iste,
     ili veoma slične tabele.
     \newpage
@@ -171,9 +171,17 @@
     brojeva neće ponavljati. Seme (eng. seed) se nasumično određujemo koristeći \texttt{std::random\_device}, a za samo generisanje brojeva u određenom intervalu
     koristimo \texttt{std::uniform\_int\_distribution}.
     \par Ovo nam omogućava generisanje nasumičnih brojeva visokog kvaliteta.
-    \subsection{Algoritmi za proveru validnosti zagonetke}
-
-
+    \subsection{Algoritmi za proveru validnosti zagonetke i brojanje grešaka}
+    Provera validnosti unete zagonetke od strane korisnika je jednostavno - proverimo da li u svakom redu, koloni ili bloku postoje duplikati. 
+    U slučaju da korisnik unosi rešenje, moramo dodatno da vodimo računa o promeni nepraznih vrednosti iz početne zagonetke.
+    \par Svakim pronalaskom pogrešnog unetog broja, izbacujemo isti iz tabele. Tako\-đe vodimo računa da ne izbacimo broj koji je bio prisutan u početnoj tabeli i da isti brojevi nisu izmenjeni u rešenju.
+    Pošto se kroz matricu preće sa leva na desno, postoje dve mogućnosti:
+    \begin{enumerate}
+        \item Naišli smo na broj koji je bio u prethodnoj tabeli i nije validan. Znamo da smo pre njega našli drugi broj koji nije validan zbog njega. Brišemo drugi broj.
+        \item Naišli smo na broj koji nije bio u prethodnoj tabeli i nije validan, brišmo ga.
+    \end{enumerate}
+    Dakle, pored informacije da li se broj pojavio u redu, koloni ili bloku, moramo da znamo i gde se tačno pojavio. Mana ovoga algoritma je favorizovanje brojeva na koje
+    se prvo naiđe.
     \newpage
     \rhead{4. Opis rešenja}
     \section{Opis rešenja}
@@ -254,11 +262,14 @@
     \end{tabular}
 
     \subsubsection{Alijas BitArray}
-    {\parindent0pt
     \texttt{using BitArray = }\\
     \texttt{std::array<std::bitset<Board::BOARD\_SIZE>, Board::BOARD\_SIZE>;}
-    }
     \par Niz od \texttt{Board::BOARD\_SIZE} setova bitova dužine \texttt{Board::BOARD\_SIZE}.
+
+    \subsubsection{Alijas PairArray}
+    \texttt{using PairArray = }\\ 
+    \texttt{std::array<std::pair<int, int>, BOARD\_SIZE>}
+    \par Niz od \texttt{Board::BOARD\_SIZE} pozicija na tabeli.
     
     \subsubsection{Funkcija članica za proveru poteza (IsPossibleMove)}
     \texttt{bool IsPossibleMove(int row, int col, int number) const;}
@@ -282,6 +293,19 @@
         \item (\texttt{bool}) True ako je trenutna tabela validna.
     \end{itemize}
 
+    \subsubsection{Funkcija za proveru da li je broj duplikat (IsDuplicate)}
+    \texttt{bool Board::IsDuplicate(int row, int col, PairArray\& buff);}\\
+    Parametri:
+    \begin{itemize}
+        \item (\texttt{int}) row - Red u kome se polje nalazi.
+        \item (\texttt{int}) col - Kolona u kome se polje nalazi.
+        \item (\texttt{PairArray}) buff - Niz koji čuva pozicije prethodno pronađenih brojeva.
+    \end{itemize}
+    Povratna vrednost:
+    \begin{itemize}
+        \item (\texttt{bool}) True ako je broj duplikat.
+    \end{itemize}
+
     \subsubsection{Funkcija članica za pronalaženje grešaka (CountErrors)}
     \texttt{int CountErrors(const Board\& original) const;}
     \par Prebrojava i ispisuje sve greške u tabeli.\\
@@ -294,12 +318,22 @@
         \item (\texttt{int}) Broj grešaka u tabeli.
     \end{itemize}
 
-    \subsubsection{Funkcija članica za dobavljanje elementa tabele (At)}
+    \subsubsection{Funkcija članica za dobavljanje broja u tabeli (At)}
     \texttt{int\& At(int row, int col);}
     \par\texttt{const int\& At(int row, int col) const;}
-    \par Dobavlja element na poziciji '(row, col)'. Proverava granice. Baca \\ \texttt{std::out\_of\_range} u slučaju da
-    su uneti brojevi nevalidni.
+    \par Dobavlja broj na polju '(row, col)'. Proverava granice. Baca \\ \texttt{std::out\_of\_range} u slučaju da
+    su uneti brojevi nevalidni.\\
+    Parametri:
+    \begin{itemize}
+        \item (\texttt{int}) row - Red u kome se polje nalazi.
+        \item (\texttt{int}) col - Kolona u kome se polje nalazi.
+    \end{itemize}
+    Povratna vrednost:
+    \begin{itemize}
+        \item (\texttt{int\&}) Referenca na broj u tabeli.
+    \end{itemize}
     
+
     \subsubsection{Statična funkcija članica za dobavljanja blocka (GetBlock)}
     \texttt{static inline int GetBlock(int row, int col);}
     \par Vraća blok u kome se nalazi polje '(row, col)'.\\
@@ -315,11 +349,11 @@
 
     \subsubsection{Funkcija članica za generisanje elemenata na glavnoj dijagonali (GenerateDiagonal)}
 	\texttt{void GenerateDiagonal();}
-	\par Generiše nasumično elemente na glavnoj dijagonali.
+	\par Generiše nasumično brojeve na glavnoj dijagonali.
 
     \subsubsection{Funcija članica za generisanje ostalih elemenata (GenerateOther)}
     \texttt{bool GenerateOther(int row, int col);}
-    \par Rekurzivno generiše nasumično elemente koji se ne nalaze na glavnoj dijagonali.\\
+    \par Rekurzivno generiše nasumično brojeve koji se ne nalaze na glavnoj dijagonali.\\
 	Parametri:
     \begin{itemize}
         \item (\texttt{int}) row - Početan red (uglavnom 0).
@@ -332,7 +366,7 @@
     
     \subsubsection{Funkcija članica za popunjavanje blokova (FillBlock)}
     \texttt{void FillBlock(int row, int col);}
-    \par Rekurzivno generiše nasumično elemente u bloku.\\
+    \par Rekurzivno generiše nasumično brojeve u bloku.\\
     Parametri:
     \begin{itemize}
         \item (\texttt{int}) row - početni red (gornje levo polje u bloku).
@@ -341,7 +375,7 @@
 
     \subsubsection{Funkcija članica za brisanje elemenata iz tabele (RemoveNumber)}
 	\texttt{void RemoveNumber(int count);}
-    \par Nasumično briše $count$ elementa iz tabele.\\
+    \par Nasumično briše $count$ brojeve iz tabele.\\
     Parametri:
     \begin{itemize}
         \item (\texttt{int}) count - broj elemenate koliko se briše iz tabele.
@@ -373,12 +407,12 @@
     \end{itemize}
     Povratna vrednost:
     \begin{itemize}
-        \item True ako postoji prazan element.
+        \item True ako postoji prazno polje.
     \end{itemize}
 
     \subsubsection{Funckija članica za brisanje tabele (Clear)}
     \texttt{void Clear();}
-    \par Postavlja sve elemente u tabeli na 0.
+    \par Postavlja sva polja u tabeli na 0.
 
     \subsubsection{Operatori upisa i ispisa}
     \par\texttt{std::istream\& operator>>(std::istream\& in, Board\& b);}
@@ -391,7 +425,7 @@
     \subsubsection{Operator dobavljanja}
     \par\texttt{int\& operator()(int row, int col);}
     \par\texttt{const int\& operator()(int row, int col) const;}
-    \par Operator za dobavljanje elementa na poziciji '(row, col)'.
+    \par Operator za dobavljanje broj na poziciji '(row, col)'.
     
     \newpage
     \rhead{5. Testiranje}
@@ -442,7 +476,7 @@
     \rhead{7. Zaključak}
     \section{Zaključak}
     Napravljen je i verifikovan jedan koncept za realizaciju datog problema. Optimizovano je traženje i generisanje rešenje i date su ideje za 
-    dodatne optimizacije. 
+    dodatne optimizacije. Iako je vrednost veličine tabele 9, moguće je generisati i rešavati i veće tabele, izmenom konstanti \texttt{BOARD\_SIZE} i \texttt{BLOCK\_SIZE}. 
     \par Rezultati merenja iz Tabele 1 pokazuju znatno ubrzanje, naručito za tabele koje imaju više praznih polja. Ovo je manje primetno za tabele koje imaju 
     manji broj praznih polja, jer je veća verovatnoća da uobičajna pretraga brzo pronađe duplikate. 
     \par Odatle zaključujemo da najviše dobijamo na vremenu kada tabela ima više praznih mesta. Dodatne optimizacije mogu pomoći u tome, ali ni jedna od njih ne 
