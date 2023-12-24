@@ -3,9 +3,10 @@
 /// Definitions of Board class.
 /// 
 ///	Author: Lazar Nagulov 
-/// Last modified: 23th December 2023
+/// Last modified: 23rd December 2023
 
 #include <unordered_set>
+#include <array>
 #include <bitset>
 #include <random>
 
@@ -19,34 +20,43 @@ Board::~Board() {}
 bool Board::IsValid() const {
 	std::unordered_set<int> rowSet;
 	std::unordered_set<int> colSet;
-	std::unordered_set<int> subMatrixSet;
+	std::unordered_set<int> blockSet;
 
-	for (int i = 0; i < BOARD_SIZE; ++i) {
+	/// Check rows.
+	for (int row = 0; row < BOARD_SIZE; ++row) {
 		rowSet.clear();
-		colSet.clear();
-		for (int j = 0; j < BOARD_SIZE; ++j) {
-			int currentRow = At(i, j);
-			int currentCol = At(j, i);
+		for (int col = 0; col < BOARD_SIZE; ++col) {
+			int currentRow = At(row, col);
+
 			if (currentRow != EMPTY && !rowSet.insert(currentRow).second) {
-				std::cerr << "Error: Duplicate number " << At(i, j) << " in row " << i << " at [" << i << ',' << j << "]" << std::endl;
+				std::cerr << "Error: Duplicate number " << At(row, col) << " in row " << row << " at " << col << "." << std::endl;
 				return false;
 			}
-			if (currentCol != EMPTY && !colSet.insert(currentCol).second) {
-				std::cerr << "Error: Duplicate number " << At(j,i) << " in column " << i << " at [" << j << ',' << i << "]" << std::endl;
-				return false;
-			}
-			rowSet.insert(currentRow);
-			colSet.insert(currentCol);
 		}
 	}
 
+	// Check columns.
+	for (int col = 0; col < BOARD_SIZE; ++col) {
+		colSet.clear();
+		for (int row = 0; row < BOARD_SIZE; ++row) {
+			int currentCol = At(row, col);
+
+			if (currentCol != EMPTY && !colSet.insert(currentCol).second) {
+				std::cerr << "Error: Duplicate number " << At(row, col) << " in column " << col << " at " << row << "." << std::endl;
+				return false;
+			}
+		}
+	}
+
+	// Check blocks (submatrices).
 	for (int block = 0; block < BOARD_SIZE; ++block) {
-		subMatrixSet.clear();
+		blockSet.clear();
 		for (int i = block / BLOCK_SIZE * BLOCK_SIZE; i < block / BLOCK_SIZE * BLOCK_SIZE + BLOCK_SIZE; ++i) {
 			for (int j = block % BLOCK_SIZE * BLOCK_SIZE; j < block % BLOCK_SIZE * BLOCK_SIZE + BLOCK_SIZE; ++j) {
 				int current = At(i, j);
-				if (current != EMPTY && !subMatrixSet.insert(current).second) {
-					std::cerr << "Error: Duplicate number " << At(i,j) << " in block "  << block  << " at [" << i << ',' << j << "]"<< std::endl;
+
+				if (current != EMPTY && !blockSet.insert(current).second) {
+					std::cerr << "Error: Duplicate number " << At(i, j) << " in block " << block << " at (" << i << ',' << j << ")." << std::endl;
 					return false;
 				}
 			}
@@ -56,7 +66,7 @@ bool Board::IsValid() const {
 	return true;
 }
 
-constexpr int Board::GetBlock(int row, int col) {
+inline int Board::GetBlock(int row, int col) {
 	return (row / Board::BLOCK_SIZE) * Board::BLOCK_SIZE + col / Board::BLOCK_SIZE;
 }
 
@@ -91,47 +101,105 @@ bool Board::Backtrack(BitArray& rowSet, BitArray& colSet, BitArray& blockSet) {
 }
 
 
-int Board::CountErrors(const Board& checking) const {
-	int result = 0;
-	std::unordered_set<int> rowSet;
-	std::unordered_set<int> colSet;
-	std::unordered_set<int> subMatrixSet;
+bool Board::IsDuplicate(int row, int col, PairArray& buff) {
+	int& current = At(row, col);
+	int idx = current - 1;
 
-	for (int i = 0; i < BOARD_SIZE; ++i) {
-		rowSet.clear();
-		colSet.clear();
-		for (int j = 0; j < BOARD_SIZE; ++j) {
-			int currentRow = At(i, j);
-			int currentCol = At(j, i);
-			if (currentRow != EMPTY && !rowSet.insert(currentRow).second) {
-				std::cerr << "Error: Duplicate number " << At(i, j) << " in row " << i << " at [" << i << ',' << j << "]" << std::endl;
-				++result;
-			}
-			if (currentCol != EMPTY && !colSet.insert(currentCol).second) {
-				std::cerr << "Error: Duplicate number " << At(j, i) << " in column " << i << " at [" << j << ',' << i << "]" << std::endl;
-				++result;
-			}
-			rowSet.insert(currentRow);
-			colSet.insert(currentCol);
-		}
+	if (current == EMPTY)
+		return false;
+
+	if (buff[idx].first == -1) {
+		buff[idx] = std::make_pair(row, col);
+		return false;
 	}
+	else {
+		return true;
+	}
+}
 
-	for (int block = 0; block < BOARD_SIZE; ++block) {
-		subMatrixSet.clear();
-		for (int i = block / BLOCK_SIZE * BLOCK_SIZE; i < block / BLOCK_SIZE * BLOCK_SIZE + BLOCK_SIZE; ++i) {
-			for (int j = block % BLOCK_SIZE * BLOCK_SIZE; j < block % BLOCK_SIZE * BLOCK_SIZE + BLOCK_SIZE; ++j) {
-				int current = At(i, j);
-				if (current != EMPTY && !subMatrixSet.insert(current).second) {
-					std::cerr << "Error: Duplicate number " << At(i, j) << " in block " << block << " at [" << i << ',' << j << "]" << std::endl;
-					++result;
+int Board::CountErrors(const Board& original) {
+	int result = 0;
+
+	PairArray buff;
+
+	for (int row = 0; row < BOARD_SIZE; ++row) {
+		std::fill(buff.begin(), buff.end(), std::make_pair(-1, -1));
+		for (int col = 0; col < BOARD_SIZE; ++col) {
+			int& current = At(row, col);
+			int currentOriginal = original(row, col);
+			int idx = current - 1;
+			if (currentOriginal != EMPTY && currentOriginal != current) {
+				std::cout << "Wrong: Value changed from original at (" << row  << ',' << col << ")." << std::endl;
+				++result;
+				At(row, col) = original(row, col);
+				continue;
+			}
+			if (IsDuplicate(row, col, buff)) {
+				std::cout << "Wrong: Duplicate number " << At(row, col) << " in row " << row << " at " << col << "." << std::endl;
+				++result;
+				if (currentOriginal == current) {
+					At(buff[idx].first, buff[idx].second) = 0;
+				}
+				else {
+					current = 0;
 				}
 			}
 		}
 	}
 
+	for (int col = 0; col < BOARD_SIZE; ++col) {
+		std::fill(buff.begin(), buff.end(), std::make_pair(-1, -1));
+		for (int row = 0; row < BOARD_SIZE; ++row) {
+			int& current = At(row, col);
+			int idx = current - 1;
+			if (IsDuplicate(row, col, buff)) {
+				std::cout << "Wrong: Duplicate number " << At(row, col) << " in column " << col << " at " << row << "." << std::endl;
+				++result;
+				if (original(row, col) == current) {
+					At(buff[idx].first, buff[idx].second) = 0;
+				}
+				else {
+					current = 0;
+				}
+			}
+		}
+	}
+
+	for (int block = 0; block < BOARD_SIZE; ++block) {
+		std::fill(buff.begin(), buff.end(), std::make_pair(-1, -1));
+		for (int row = block / BLOCK_SIZE * BLOCK_SIZE; row < block / BLOCK_SIZE * BLOCK_SIZE + BLOCK_SIZE; ++row) {
+			for (int col = block % BLOCK_SIZE * BLOCK_SIZE; col < block % BLOCK_SIZE * BLOCK_SIZE + BLOCK_SIZE; ++col) {
+				int& current = At(row, col);
+				int idx = current - 1;
+				if (IsDuplicate(row, col, buff)) {
+					std::cerr << "Error: Duplicate number " << At(row, col) << " in block " << block << " at (" << row << ',' << col << ")" << std::endl;
+					++result;
+					if (original(row, col) == current) {
+						At(buff[idx].first, buff[idx].second) = 0;
+					}
+					else {
+						current = 0;
+					}
+				}
+
+			}
+		}
+	}
+
+
 	return result;
 }
-
+int Board::CountEmpty() {
+	int result = 0;
+	for (int row = 0; row < Board::BOARD_SIZE; ++row) {
+		for (int col = 0; col < Board::BOARD_SIZE; ++col) {
+			if (At(row, col) == EMPTY) {
+				++result;
+			}
+		}
+	}
+	return result;
+}
 
 bool Board::IsPossibleMove(int row, int col, int number) const {
 	for (int i = 0; i < Board::BOARD_SIZE; ++i) {

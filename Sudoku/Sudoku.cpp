@@ -3,7 +3,7 @@
 /// Definitions for the Sudoku class, the main class operating with the Board class and providing a user interface.
 /// 
 /// Author: Lazar Nagulov
-/// Last modified: 23rd December 2023.
+/// Last modified: 24th December 2023
 
 #include <array>
 #include <bitset>
@@ -19,7 +19,7 @@
 /// <param name="inputFile"> Input file name</param>
 /// <param name="outputFile"> Output file name</param>
 Sudoku::Sudoku(std::string& inputFile, std::string& outputFile)
-    : correctCount(0), wrongCount(0), currentRound(1), emptyCount(0), inputFile(inputFile), outputFile(outputFile) {}
+    : correctCount(0), wrongCount(0), currentRound(1), inputFile(inputFile), outputFile(outputFile) {}
 Sudoku::~Sudoku() {}
 
 
@@ -95,11 +95,18 @@ void Sudoku::CheckSolution() {
     std::cout << "Imported solution" << std::endl;
     std::cout << loaded;
     
+    // Calculate statistics
+    int total = Board::BOARD_SIZE * Board::BOARD_SIZE;
+    int emptyCount = loaded.CountEmpty();
+    int clues =  total - board.CountEmpty();
     wrongCount = loaded.CountErrors(board);
+    
+    correctCount = total - wrongCount - emptyCount  - clues;
+
     std::cout << *this << std::endl;
 }
 
-
+/*
 static bool Backtrack(Board& board) {
     int row, col;
     if (!board.FindEmpty(row, col)) {
@@ -116,16 +123,15 @@ static bool Backtrack(Board& board) {
     }
     return false;
 }
+*/
 
-/// <summary>
-/// Solves the current state of the Sudoku puzzle using a backtracking algorithm.
-/// The solved puzzle is written to the specified output file.
-/// </summary>
 void Sudoku::Solve() {
     Board::BitArray rowSet;
     Board::BitArray colSet;
     Board::BitArray blockSet;
 
+
+    // Fill BitArrays
     for (int row = 0; row < Board::BOARD_SIZE; ++row) {
         for (int col = 0; col < Board::BOARD_SIZE; ++col) {
             int number = board(row, col);
@@ -141,20 +147,19 @@ void Sudoku::Solve() {
 
     board.Backtrack(rowSet, colSet, blockSet);
  
+    std::cout << "Solution:" << std::endl;
+    std::cout << board << std::endl;
+
     std::ofstream out(outputFile);
     out << board;
+    out.close();
 }
 
-/// <summary>
-/// Generates a Sudoku puzzle with the specified difficulty level.
-/// </summary>
-/// <param name="difficulty">Difficulty level of the Sudoku puzzle.</param>
 void Sudoku::Generate(Difficulty difficulty) {
     board.Clear();
-    emptyCount = difficulty;
     board.GenerateDiagonal();
     board.GenerateOther(0,0);
-    board.RemoveNumber(difficulty);
+    board.RemoveNumber(static_cast<int>(difficulty));
 }
 
 /// <summary>
@@ -164,6 +169,7 @@ void Sudoku::Generate(Difficulty difficulty) {
 /// <param name="sudoku">Reference to the const Sudoku object to be written.</param>
 /// <returns>Reference to the output stream after writing the game state.</returns>
 std::ostream& operator<<(std::ostream& out, const Sudoku& sudoku) {
+    out << "Results:" << '\n';
     out << "Round: " << sudoku.currentRound << '\n';
     out << "Correct: " << sudoku.correctCount << '\n';
     out << "Wrong: " << sudoku.wrongCount << '\n';

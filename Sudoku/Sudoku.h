@@ -4,7 +4,7 @@
 /// Contains a main game functions such as Run, Solve, Generate.
 /// 
 ///	Author: Lazar Nagulov 
-/// Last modified: 18.12.2023.
+/// Last modified: 23rd December 2023
 #pragma once
 #include <fstream>
 #include <bitset>
@@ -13,7 +13,7 @@
 
 class Sudoku {
 public:
-	enum Difficulty {
+	enum class Difficulty {
 		EASY = 43,
 		MEDIUM = 50,
 		HARD = 56,
@@ -33,8 +33,14 @@ public:
 	/// Displays solving options for the Sudoku game and processes the user's choice.
 	/// Options include importing a solution, solving the puzzle, or exiting the program.
 	/// </summary>
+	void SolvingOptions();
+
+	/// <summary>
+	/// Solves the current state of the Sudoku puzzle using a backtracking algorithm.
+	/// The solved puzzle is written to the specified output file.
+	/// </summary>
 	void Solve();
-	
+
 	/// <summary>
 	/// Compares the loaded solution from an input file with the current state of the Sudoku puzzle.
 	/// Counts and displays the number of incorrect cells in the current state.
@@ -42,18 +48,19 @@ public:
 	void CheckSolution();
 
 	/// <summary>
-	/// Solves the current state of the Sudoku puzzle using a backtracking algorithm.
-	/// The solved puzzle is written to the specified output file.
+	/// Generates a Sudoku puzzle with the specified difficulty level.
 	/// </summary>
+	/// <param name="difficulty">Difficulty level of the Sudoku puzzle.</param>
 	void Generate(Difficulty difficulty);
 
 	friend std::ostream& operator<<(std::ostream& out, const Sudoku& sudoku);
 private:
-	void SolvingOptions();
-	std::string inputFile, outputFile;
-	int emptyCount;
+	std::string inputFile;
+	std::string outputFile;
+
 	int currentRound;
 	int correctCount;
 	int wrongCount;
+
 	Board board;
 };

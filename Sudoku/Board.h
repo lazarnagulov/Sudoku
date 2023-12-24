@@ -3,7 +3,7 @@
 /// Declarations for the Board class, which includes member functions for generating and solving Sudoku puzzles.
 /// 
 /// Author: Lazar Nagulov
-/// Last modified: 19th December 2023.
+/// Last modified: 23rd December 2023
 
 #pragma once
 #include <iostream>
@@ -22,7 +22,8 @@ public:
 	static const char EMPTY_CHAR = '_';
 
 	using BitArray = std::array<std::bitset<Board::BOARD_SIZE>, Board::BOARD_SIZE>;
-	
+	using PairArray = std::array<std::pair<int, int>, BOARD_SIZE>;
+
 	/// <summary>
 	/// Checks if the current board is valid.
 	/// </summary>
@@ -30,19 +31,12 @@ public:
 	bool IsValid() const;
 	
 	/// <summary>
-	/// Checks for errors in the current board, prints them, and counts them.
+	/// Counts and reports the number of errors in the current Sudoku board by checking rows, columns, and blocks.
 	/// </summary>
-	/// <returns>Number of errors.</returns>
-	int CountErrors(const Board& original) const;
+	/// <param name="checking">Original board to check for errors.</param>
+	/// <returns>The number of errors found in the board.</returns>
+	int CountErrors(const Board& original);
 	
-	/// <summary>
-	/// Checks if placing a given number at the specified position in the board is a valid move.
-	/// </summary>
-	/// <param name="row">Row index of the position.</param>
-	/// <param name="col">Column index of the position.</param>
-	/// <param name="number">Number to be checked for validity.</param>
-	/// <returns>True if placing the number is a valid move, false otherwise.</returns>
-	bool IsPossibleMove(int row, int col, int number) const;
 
 	/// <summary>
 	/// Finds the first empty cell in the board and updates the row and column parameters.
@@ -52,6 +46,9 @@ public:
 	/// <returns>True if an empty cell is found, false otherwise.</returns>
 	bool FindEmpty(int& row, int& col);
 	
+
+	int CountEmpty();
+
 	/// <summary>
 	/// Generates a Sudoku board with diagonal blocks filled.
 	/// Diagonal blocks are filled using the FillBlock function starting from the top-left corner.
@@ -66,12 +63,6 @@ public:
 	/// <returns>True if a valid puzzle is successfully generated, false otherwise.</returns>
 	bool GenerateOther(int row, int col);
 	
-	/// <summary>
-	/// Fills a block starting from the specified position with random numbers from 1 to BOARD_SIZE.
-	/// </summary>
-	/// <param name="row">Starting row index of the block.</param>
-	/// <param name="col">Starting column index of the block.</param>
-	void FillBlock(int row, int col);
 
 	/// <summary>
 	/// Randomly removes numbers from the board to create a puzzle with the specified count of empty cells.
@@ -99,7 +90,7 @@ public:
 	/// <param name="row">Row index of the cell.</param>
 	/// <param name="col">Column index of the cell.</param>
 	/// <returns>The block index for the specified cell position.</returns>
-	static constexpr int GetBlock(int row, int col);
+	static inline int GetBlock(int row, int col);
 
 	/// <summary>
 	/// Provides read-only access to the value at the specified cell in the board.
@@ -138,6 +129,32 @@ public:
 	friend std::istream& operator>>(std::istream& in, Board& board);
 	friend std::ostream& operator<<(std::ostream& out, const Board& board);
 	friend std::ofstream& operator<<(std::ofstream& out, const Board& board);
+private:
+	/// <summary>
+	/// Checks if the number at the specified cell in the board is a duplicate within its row, column or block.
+	/// Keeps track of the first occurrence of each number in the given buffer.
+	/// </summary>
+	/// <param name="row">Row index of the cell.</param>
+	/// <param name="col">Column index of the cell.</param>
+	/// <param name="buff">Buffer to track the first occurrence of each number.</param>
+	/// <returns>True if the number is a duplicate, false otherwise.</returns>
+	bool IsDuplicate(int row, int col, PairArray& buff);
+
+	/// <summary>
+	/// Fills a block starting from the specified position with random numbers from 1 to BOARD_SIZE.
+	/// </summary>
+	/// <param name="row">Starting row index of the block.</param>
+	/// <param name="col">Starting column index of the block.</param>
+	void FillBlock(int row, int col);
+
+	/// <summary>
+	/// Checks if placing a given number at the specified position in the board is a valid move.
+	/// </summary>
+	/// <param name="row">Row index of the position.</param>
+	/// <param name="col">Column index of the position.</param>
+	/// <param name="number">Number to be checked for validity.</param>
+	/// <returns>True if placing the number is a valid move, false otherwise.</returns>
+	bool IsPossibleMove(int row, int col, int number) const;
 private:
 	int board[BOARD_SIZE * BOARD_SIZE];
 };
