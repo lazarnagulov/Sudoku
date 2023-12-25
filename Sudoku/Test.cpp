@@ -91,75 +91,133 @@ std::string TestValid() {
 /// Tests board error counting
 std::string TestChangedValue() {
 	int wrong = CheckErrors("../../Testovi/original_changed.txt", "../../Testovi/error_changed.txt");
+	std::cout << "Total errors: " << wrong << std::endl;
 	if (wrong != 3) {
 		return "Fail - Expected wrong count to be 3 but got " + std::to_string(wrong) + ".";
 	}
 	return "Pass";
 }
 
+std::string TestRow() {
+	int wrong = CheckErrors("../../Testovi/original_row.txt", "../../Testovi/error_row.txt");
+	std::cout << "Total errors: " << wrong << std::endl;
+	if (wrong != 4) {
+		return "Fail - Expected wrong count to be 4 but got " + std::to_string(wrong) + ".";
+	}
+
+	return "Pass";
+}
+
+std::string TestColumn() {
+	int wrong = CheckErrors("../../Testovi/original_column.txt", "../../Testovi/error_column.txt");
+	std::cout << "Total errors: " << wrong << std::endl;
+	if (wrong != 4) {
+		return "Fail - Expected wrong count to be 4 but got " + std::to_string(wrong) + ".";
+	}
+
+	return "Pass";
+}
+
+std::string TestBlock() {
+	int wrong = CheckErrors("../../Testovi/original_block.txt", "../../Testovi/error_block.txt");
+	std::cout << "Total errors: " << wrong << std::endl;
+	if (wrong != 2) {
+		return "Fail - Expected wrong count to be 2 but got " + std::to_string(wrong) + ".";
+	}
+
+	return "Pass";
+}
 
 std::string TestErrorCountAll() {
-	int wrong = CheckErrors("../../Testovi/original_all.txt", "../../Testovi/error_all.txt");
+	int wrong = CheckErrors("../../Testovi/original_all_1.txt", "../../Testovi/error_all_1.txt");
+	std::cout << "Total errors: " << wrong << std::endl;
 	if (wrong != 4) {
 		return "Fail - Expected wrong count to be 4 but got " + std::to_string(wrong) + ".";
 	}
 
 	wrong = CheckErrors("../../Testovi/original_all_2.txt", "../../Testovi/error_all_2.txt");
+	std::cout << "Total errors: " << wrong << std::endl;
 	if (wrong != 4) {
 		return "Fail - Expected wrong count to be 4 but got " + std::to_string(wrong) + ".";
 	}
 
 	wrong = CheckErrors("../../Testovi/original_all_3.txt", "../../Testovi/error_all_3.txt");
+	std::cout << "Total errors: " << wrong << std::endl;
 	if (wrong != 3) {
 		return "Fail - Expected wrong count to be 3 but got " + std::to_string(wrong) + ".";
 	}
 
 	return "Pass";
 }
+
 /// Tests generation
-std::string TestGenerate() {
+std::string TestGenerateAndSolve() {
+	Sudoku s("input.txt", "output.txt");
+	for (int i = 0; i < 100; ++i) {
+		s.Generate(Sudoku::Difficulty::HARD);
+		if (!s.Solve()) 
+			return "Fail - Could not solve board " + std::to_string(i) + ".";
+	}
+
 	return "Pass";
 }
 
-/// Test Solve
-std::string TestSolve() {
-	return "Pass";
-}
 
 void TestRun() {
 	std::string result;
 	std::cout << "-----" << std::endl;
-	result = TestInvalidColumn();
-	std::cout << "TestInvalidColumn >" << result << std::endl;
-	std::cout << "-----" << std::endl;
 
-	result = TestInvalidRow();
-	std::cout << "TestInvalidRow > " << result << std::endl;
+	std::cout << "TestValid" << std::endl;
 	std::cout << "-----" << std::endl;
-
-	result = TestInvalidBlock();
-	std::cout << "TestInvalidBlock > " << result << std::endl;
-	std::cout << "-----" << std::endl;
-
-	result = TestChangedValue();
-	std::cout << "TestChangedValue > " << result << std::endl;
-	std::cout << "-----" << std::endl;
-
-	result = TestErrorCountAll();
-	std::cout << "TestErrorCountAll > " << result << std::endl;
-	std::cout << "-----" << std::endl;
-
-#if 0
 	result = TestValid();
-	std::cout << "TestValid > " << result << std::endl;
-	result = TestErrorCount();
-	std::cout << "TestErrorCount > " << result << std::endl;
+	std::cout << ">>>> " << result << " <<<<" << std::endl;
+
+	std::cout << "TestInvalidColumn" << std::endl;
+	std::cout << "-----" << std::endl;
+	result = TestInvalidColumn();
+	std::cout << "-----" << std::endl;
+	std::cout << ">>>> " << result << " <<<<" << std::endl;
+
+	std::cout << "TestInvalidRow" << std::endl;
+	std::cout << "-----" << std::endl;
+	result = TestInvalidRow();
+	std::cout << ">>>> " << result << " <<<<" << std::endl;
+
+	std::cout << "TestInvalidBlock" << std::endl;
+	std::cout << "-----" << std::endl;
+	result = TestInvalidBlock();
+	std::cout << ">>>> " << result << " <<<<" << std::endl;
+
+	std::cout << "TestChangedValue" << std::endl;
+	std::cout << "-----" << std::endl;
 	result = TestChangedValue();
-	std::cout << "TestChangedValue > " << result << std::endl;
-	result = TestGenerate();
-	std::cout << "TestGenerate > " << result << std::endl;
-	result = TestSolve();
-	std::cout << "TestSolve > " << result << std::endl;
-#endif
+	std::cout << ">>>> " << result << " <<<<" << std::endl;
+
+	std::cout << "TestRow" << std::endl;
+	std::cout << "-----" << std::endl;
+	result = TestRow();
+	std::cout << ">>>> " << result << " <<<<" << std::endl;
+
+	std::cout << "TestColumn" << std::endl;
+	std::cout << "-----" << std::endl;
+	result = TestColumn();
+	std::cout << ">>>> " << result << " <<<<" << std::endl;
+
+	std::cout << "TestBlock" << std::endl;
+	std::cout << "-----" << std::endl;
+	result = TestBlock();
+	std::cout << ">>>> " << result << " <<<<" << std::endl;
+
+	std::cout << "TestErrorCountAll" << std::endl;
+	std::cout << "-----" << std::endl;
+	result = TestErrorCountAll();
+	std::cout << ">>>> " << result << " <<<<" << std::endl;
+
+	std::cout << "TestGenerateAndSolve" << std::endl;
+	std::cout << "-----" << std::endl;
+	result = TestGenerateAndSolve();
+	std::cout << ">>>> " << result << " <<<<" << std::endl;
+
+	std::cout << "End of tests!" << std::endl;
 }
 

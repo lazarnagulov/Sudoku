@@ -20,14 +20,15 @@ std::string TestValid();
 std::string TestPossibleMoves();
 /// Tests board error counting
 std::string TestErrorCountAll();
+std::string TestRow();
+std::string TestColumn();
+std::string TestBlock();
 std::string TestChangedValue();
-/// Tests generation
-std::string TestGenerate();
-/// Test Solve
-std::string TestSolve();
+/// Tests generation and solvability
+std::string TestGenerateAndSolve();
 
 /// <summary>
-/// Run all tests;
+/// Run all tests.
 /// </summary>
 void TestRun();
 
