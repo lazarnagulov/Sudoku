@@ -3,7 +3,7 @@
 /// Declarations for the Board class, which includes member functions for generating and solving Sudoku puzzles.
 /// 
 /// Author: Lazar Nagulov
-/// Last modified: 23rd December 2023
+/// Last modified: 25rd December 2023
 
 #pragma once
 #include <iostream>
@@ -14,7 +14,8 @@
 class Board {
 public:
 	Board();
-	~Board();
+	~Board() = default;
+	Board(const Board&) = delete;
 
 	static const int BOARD_SIZE = 9;
 	static const int BLOCK_SIZE = 3;
@@ -44,10 +45,13 @@ public:
 	/// <param name="row">Reference to the variable to store the row index of the empty cell.</param>
 	/// <param name="col">Reference to the variable to store the column index of the empty cell.</param>
 	/// <returns>True if an empty cell is found, false otherwise.</returns>
-	bool FindEmpty(int& row, int& col);
+	bool FindEmpty(int& row, int& col) const;
 	
-
-	int CountEmpty();
+	/// <summary>
+	/// Counts the number of empty cells in the board.
+	/// </summary>
+	/// <returns>The count of empty cells in the board.</returns>
+	int CountEmpty() const;
 
 	/// <summary>
 	/// Generates a Sudoku board with diagonal blocks filled.

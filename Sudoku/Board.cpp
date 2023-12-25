@@ -3,7 +3,7 @@
 /// Definitions of Board class.
 /// 
 ///	Author: Lazar Nagulov 
-/// Last modified: 23rd December 2023
+/// Last modified: 25rd December 2023
 
 #include <unordered_set>
 #include <array>
@@ -15,7 +15,6 @@
 Board::Board() {
 	memset(board, 0, sizeof(board));
 }
-Board::~Board() {}
 
 bool Board::IsValid() const {
 	std::unordered_set<int> rowSet;
@@ -129,13 +128,15 @@ int Board::CountErrors(const Board& original) {
 			int currentOriginal = original(row, col);
 			int idx = current - 1;
 			if (currentOriginal != EMPTY && currentOriginal != current) {
-				std::cout << "Wrong: Value changed from original at (" << row  << ',' << col << ")." << std::endl;
+				std::cout << "Error: Value changed from original at (" << row  << ',' << col << ")." << std::endl;
 				++result;
 				At(row, col) = original(row, col);
 				continue;
 			}
 			if (IsDuplicate(row, col, buff)) {
-				std::cout << "Wrong: Duplicate number " << At(row, col) << " in row " << row << " at " << col << "." << std::endl;
+				std::cout << "Error: Duplicate number " << At(row, col) << " found in ("
+					<< buff[idx].first << "," << buff[idx].second << ") and ("
+					<< row << "," << col << ")." << std::endl;
 				++result;
 				if (currentOriginal == current) {
 					At(buff[idx].first, buff[idx].second) = 0;
@@ -153,7 +154,9 @@ int Board::CountErrors(const Board& original) {
 			int& current = At(row, col);
 			int idx = current - 1;
 			if (IsDuplicate(row, col, buff)) {
-				std::cout << "Wrong: Duplicate number " << At(row, col) << " in column " << col << " at " << row << "." << std::endl;
+				std::cout << "Error: Duplicate number " << At(row, col) << " found in ("
+					<< buff[idx].first << "," << buff[idx].second << ") and ("
+					<< row << "," << col << ")." << std::endl;
 				++result;
 				if (original(row, col) == current) {
 					At(buff[idx].first, buff[idx].second) = 0;
@@ -172,7 +175,9 @@ int Board::CountErrors(const Board& original) {
 				int& current = At(row, col);
 				int idx = current - 1;
 				if (IsDuplicate(row, col, buff)) {
-					std::cerr << "Error: Duplicate number " << At(row, col) << " in block " << block << " at (" << row << ',' << col << ")" << std::endl;
+					std::cerr << "Error: Duplicate number " << At(row, col) << "found in block " << block
+						<< buff[idx].first << "," << buff[idx].second 
+						<< ") and (" << row << ',' << col << ")" << std::endl;
 					++result;
 					if (original(row, col) == current) {
 						At(buff[idx].first, buff[idx].second) = 0;
@@ -189,7 +194,8 @@ int Board::CountErrors(const Board& original) {
 
 	return result;
 }
-int Board::CountEmpty() {
+
+int Board::CountEmpty() const {
 	int result = 0;
 	for (int row = 0; row < Board::BOARD_SIZE; ++row) {
 		for (int col = 0; col < Board::BOARD_SIZE; ++col) {
@@ -311,7 +317,7 @@ void Board::RemoveNumber(int count) {
 	}
 }
 
-bool Board::FindEmpty(int& row, int& col) {
+bool Board::FindEmpty(int& row, int& col) const {
 	for (row = 0; row < Board::BOARD_SIZE; ++row)
 		for (col = 0; col < Board::BOARD_SIZE; ++col)
 			if (At(row, col) == Board::EMPTY)

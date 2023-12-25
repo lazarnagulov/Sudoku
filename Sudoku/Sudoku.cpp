@@ -3,25 +3,20 @@
 /// Definitions for the Sudoku class, the main class operating with the Board class and providing a user interface.
 /// 
 /// Author: Lazar Nagulov
-/// Last modified: 24th December 2023
+/// Last modified: 25th December 2023
 
 #include <array>
 #include <bitset>
 #include <string>
-#include <cstdlib>
+#include <exception>
 
 #include "Sudoku.h"5
 #include "Timer.h"
 
-/// <summary>
-/// Main constructor for Sudoku class.
-/// </summary>
-/// <param name="inputFile"> Input file name</param>
-/// <param name="outputFile"> Output file name</param>
-Sudoku::Sudoku(std::string& inputFile, std::string& outputFile)
-    : correctCount(0), wrongCount(0), currentRound(1), inputFile(inputFile), outputFile(outputFile) {}
-Sudoku::~Sudoku() {}
 
+Sudoku::Sudoku(const std::string& inputFile, const std::string& outputFile)
+    : correctCount(0), wrongCount(0), currentRound(1), inputFile(inputFile), outputFile(outputFile) {
+}
 
 void Sudoku::Run() {
     while (true) {
@@ -32,58 +27,71 @@ void Sudoku::Run() {
         std::cout << "3 > Exit" << std::endl;
 
         int ans;
-        std::cout << ">> ";
-        std::cin >> ans;
-        if (ans == 1) {
-            Generate(Difficulty::HARD);
-            std::ofstream out(outputFile);
-            out << board;
-            std::cout << board << std::endl;
-            out.close();
-            SolvingOptions();
-        }
-        else if (ans == 2) {
-            std::ifstream in(inputFile);
-            in >> board;
-            std::cout << "Loaded puzzle:" << std::endl;
-            std::cout << board << std::endl;
-            in.close();
-            bool valid = board.IsValid();
-            if (!valid) {
-                std::cout << "Loaded puzzle is not valid!" << std::endl;
-                continue;
+        do {
+            std::cout << ">> ";
+            std::cin >> ans;
+            if (ans == 1) {
+                Generate(Difficulty::HARD);
+                std::ofstream out(outputFile);
+                out << board;
+                std::cout << board << std::endl;
+                out.close();
+                SolvingOptions();
+                break;
             }
-            SolvingOptions();
-        }
-        else if (ans == 3) {
-            exit(0);
-        }
-        else {
-            std::cerr << "Invalid command" << std::endl;
-        }
+            else if (ans == 2) {
+                std::ifstream in(inputFile);
+                in >> board;
+                std::cout << "Loaded puzzle:" << std::endl;
+                std::cout << board << std::endl;
+                in.close();
+                bool valid = board.IsValid();
+                if (!valid) {
+                    std::cout << "Loaded puzzle is not valid!" << std::endl;
+                    continue;
+                }
+                SolvingOptions();
+                break;
+            }
+            else if (ans == 3) {
+                exit(0);
+            }
+            else {
+                std::cerr << "Invalid command" << std::endl;
+            }
+        } while (true);
     }
 }
 
 void Sudoku::SolvingOptions() {
+    std::cout << "Solve puzzle" << std::endl;
     std::cout << "1 > Import solution" << std::endl;
     std::cout << "2 > Solve" << std::endl;
     std::cout << "3 > Exit" << std::endl;
 
     int ans;
-    std::cout << ">> ";
-    std::cin >> ans;
-    if (ans == 1) {
-        CheckSolution();
-    }
-    else if (ans == 2) {
-        Solve();
-    }
-    else if (ans == 3) {
-        exit(0);
-    }
-    else {
-        std::cerr << "Invalid command" << std::endl;
-    }
+    do {
+        std::cout << ">> ";
+        std::cin >> ans;
+        if (ans == 1) {
+            CheckSolution();
+            break;
+        }
+        else if (ans == 2) {
+            Solve();
+            break;
+        }
+        else if (ans == 3) {
+            exit(0);
+            break;
+        }
+        else {
+            std::cerr << "Invalid command" << std::endl;
+        }
+    } while (true);
+    std::cout << "Solution:" << std::endl;
+    std::cout << board << std::endl;
+    std::cout << *this << std::endl;
     ++currentRound;
 }
 
@@ -125,7 +133,7 @@ static bool Backtrack(Board& board) {
 }
 */
 
-void Sudoku::Solve() {
+bool Sudoku::Solve() {
     Board::BitArray rowSet;
     Board::BitArray colSet;
     Board::BitArray blockSet;
@@ -146,13 +154,16 @@ void Sudoku::Solve() {
     }
 
     board.Backtrack(rowSet, colSet, blockSet);
- 
-    std::cout << "Solution:" << std::endl;
-    std::cout << board << std::endl;
 
+    if (!board.IsValid()) {
+        std::cerr << "Error: Could not solve the puzzle!" << std::endl;
+        return false;
+    }
+ 
     std::ofstream out(outputFile);
     out << board;
     out.close();
+    return true;
 }
 
 void Sudoku::Generate(Difficulty difficulty) {

@@ -4,7 +4,7 @@
 /// Contains a main game functions such as Run, Solve, Generate.
 /// 
 ///	Author: Lazar Nagulov 
-/// Last modified: 23rd December 2023
+/// Last modified: 25rd December 2023
 #pragma once
 #include <fstream>
 #include <bitset>
@@ -20,8 +20,14 @@ public:
 		VERY_HARD = 60,
 	};
 
-	Sudoku(std::string& inputFile, std::string& outputFile);
-	~Sudoku();
+	/// <summary>
+	/// Main constructor for Sudoku class.
+	/// </summary>
+	/// <param name="inputFile"> Input file name</param>
+	/// <param name="outputFile"> Output file name</param>
+	Sudoku(const std::string& inputFile, const std::string& outputFile);
+	~Sudoku() = default;
+	Sudoku(const Sudoku&) = delete;
 
 	/// <summary>
 	/// Runs the Sudoku game, providing options to generate a new puzzle, load a puzzle from a file, or exit the program.
@@ -39,7 +45,8 @@ public:
 	/// Solves the current state of the Sudoku puzzle using a backtracking algorithm.
 	/// The solved puzzle is written to the specified output file.
 	/// </summary>
-	void Solve();
+	/// <returns>True solution is found.</returns>
+	bool Solve();
 
 	/// <summary>
 	/// Compares the loaded solution from an input file with the current state of the Sudoku puzzle.
@@ -55,8 +62,8 @@ public:
 
 	friend std::ostream& operator<<(std::ostream& out, const Sudoku& sudoku);
 private:
-	std::string inputFile;
-	std::string outputFile;
+	const std::string inputFile;
+	const std::string outputFile;
 
 	int currentRound;
 	int correctCount;
