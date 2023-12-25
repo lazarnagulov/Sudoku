@@ -1,5 +1,23 @@
 #include "Test.h"
 
+
+static int CheckErrors(const std::string& originalFile, const std::string& compareFile) {
+	Board original;
+	Board compare;
+
+	std::ifstream inOriginal(originalFile);
+	std::ifstream inCompare(compareFile);
+
+	inOriginal >> original;
+	inCompare >> compare;
+
+	int wrong = compare.CountErrors(original);
+
+	inOriginal.close();
+	inCompare.close();
+	return wrong;
+}
+
 /// Tests board validation
 std::string TestInvalidColumn() {
 	std::string result;
@@ -55,14 +73,13 @@ std::string TestPossibleMoves() {
 }
 
 std::string TestValid() {
-	std::string result;
-
 	std::string inputFile("../../Testovi/valid.txt");
 	std::ifstream in(inputFile);
 	Board b;
 	in >> b;
 
 	bool valid = b.IsValid();
+
 	if (valid) {
 		return "Pass";
 	}
@@ -73,47 +90,28 @@ std::string TestValid() {
 
 /// Tests board error counting
 std::string TestChangedValue() {
-	Board original;
-	Board compare;
-	std::string originalFile("../../Testovi/original_changed.txt");
-	std::string compareFile("../../Testovi/error_changed.txt");
-	std::ifstream inOriginal(originalFile);
-	std::ifstream inCompare(compareFile);
-
-	inOriginal >> original;
-	inCompare >> compare;
-
-	int wrong = compare.CountErrors(original);
-
-	inOriginal.close();
-	inCompare.close();
-
+	int wrong = CheckErrors("../../Testovi/original_changed.txt", "../../Testovi/error_changed.txt");
 	if (wrong != 3) {
 		return "Fail - Expected wrong count to be 3 but got " + std::to_string(wrong) + ".";
 	}
-
 	return "Pass";
 }
 
+
 std::string TestErrorCountAll() {
-	Board original;
-	Board compare;
-	std::string originalFile("../../Testovi/original_all.txt");
-	std::string compareFile("../../Testovi/error_all.txt");
+	int wrong = CheckErrors("../../Testovi/original_all.txt", "../../Testovi/error_all.txt");
+	if (wrong != 4) {
+		return "Fail - Expected wrong count to be 4 but got " + std::to_string(wrong) + ".";
+	}
 
-	std::ifstream inOriginal(originalFile);
-	std::ifstream inCompare(compareFile);
+	wrong = CheckErrors("../../Testovi/original_all_2.txt", "../../Testovi/error_all_2.txt");
+	if (wrong != 4) {
+		return "Fail - Expected wrong count to be 4 but got " + std::to_string(wrong) + ".";
+	}
 
-	inOriginal >> original;
-	inCompare >> compare;
-
-	int wrong = compare.CountErrors(original);
-	
-	inOriginal.close();
-	inCompare.close();
-
-	if (wrong != 6) {
-		return "Fail - Expected wrong count to be 6 but got " + std::to_string(wrong) + ".";
+	wrong = CheckErrors("../../Testovi/original_all_3.txt", "../../Testovi/error_all_3.txt");
+	if (wrong != 3) {
+		return "Fail - Expected wrong count to be 3 but got " + std::to_string(wrong) + ".";
 	}
 
 	return "Pass";
@@ -122,6 +120,7 @@ std::string TestErrorCountAll() {
 std::string TestGenerate() {
 	return "Pass";
 }
+
 /// Test Solve
 std::string TestSolve() {
 	return "Pass";
