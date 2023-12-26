@@ -51,7 +51,7 @@
         \item \texttt{Load Sudoku puzzle from file} - Učitavanja zagonetke.
         \item \texttt{Exit} - Izlaska iz igre.
     \end{itemize}
-    Generisana zagonetka se upisuje u $output.txt$ datoteku.
+    Generisana zagonetka se upisuje u $output.txt$ datoteku. Zagotka se učitava iz $input.txt$.
     Nakon generisanja ili učitavanja zagonetke, korisnik može da:
     \begin{itemize}
         \item \texttt{Import solution} - Učita rešenje.
@@ -67,12 +67,12 @@
     \section{Analiza problema}
     \par Glavni problem zadatka je mogućnost rešavanja zagonetke, jer nam je algoritam za rešavanju zagonetke neophodan za generisanje iste. Takođe je potrebna provera
     validnosti unete zagonetke. Prvo ćemo razmotriti probleme rešavanja zagonetke, pa onda problem validacije.
-    \par Najčešći način koji se koristi u rešavanju zagonetke je isprobavajući svaka moguća rešenja. Broj mogućnosti da se prazna polja eksponencijalno zavisi od broja praznih polja, pa je
+    \par Najčešći način koji se koristi u rešavanju zagonetke je isprobavajući svaka moguća rešenja. Broj mogućnosti da se prazna polja popune eksponencijalno zavisi od broja praznih polja, pa je
     neophodno da razmotrimo mogućnosti optimizacije algoritma. Sam algoritam je rekurzivan, što može da dovede do 
     prelivanja steka (eng. Stack overflow). Znači da moramo da umanjivo broj mogućih rekurzivnih poziva. Pozitivna strana je sigurno pronalaženje 
     rešenja za svaku zagonetku (ukoliko ono postoji) i što u osnovi ne koristimo dodatne strukture podataka izuzev same tabele. Nažalost, za uvođenje bilo kakvih optimizacija neophodno je
     dodatno zauzeće memorije.
-    \par Za potrebe validiranja postavlja se pitane „Šta se ubraja u greške?". Na primer, ako je broj u tabeli duplikat u koloni i u redu, koliko se tačno nalazi grešaka u tabeli?
+    \par Za potrebe validiranja postavlja se pitanje „Šta se ubraja u greške?". Na primer, ako je broj u tabeli duplikat u koloni i u redu, koliko se tačno nalazi grešaka u tabeli?
     U našem slučaju, ukoliko naiđemo na broj koji je duplikat, on se uklanja iz tabele (sem ako nije bio u originalnoj zagonetci, onda se uklanja prethodni broj sa istom vrednošću) i računa kao jedna greška.
     \par Takođe moramo razmotriti mogućnosti generisanje pseudoslučajnih brojeva za generisanje tabele. Primećujemo da korišćenjem obične random funkcije često generiše iste,
     ili veoma slične tabele.
@@ -87,9 +87,9 @@
     Ovo je algoritam grube sile (eng. Brute force) koji isprobava sve moguće kombinacije. Dakle, potrebno je da se prođe kroz
     svako polje u tabeli. Ukoliko je polje prazno, upisujemo cifru koja u trenutnoj tabeli ispunjava sva pravila. Nakon upisivanje cifre, rekurzivno pozivamo funkciju 
     - pokušavamo da pronađe rešenje sa novom tabelom. Ukoliko rešenje nije pronađeno, vraćamo se nazad i upisujemo drugu cifru. 
-    \par Vremenska složenost ovog algoritma je $\mathcal{O}(n ^ m)$, gde je $n$ dimenzija tabele, a $m$ broj polja koja trebaju da se popune.
-    (U našem slučaju je složenost $\mathcal{O}(9^n)$). Minimalan broj polja koja
-    moraju biti popunjena je $17$, dakle, u najgorem slučaju se provera $9^{64}$ mogućnosti!
+    \par Da bi izučavanje vremenske složenosti imalo smisla, pretpostavimo da je zagonetke matrica dimenzije $n\times n$. Vremenska složenost ovog algoritma je 
+    $\mathcal{O}(n ^ m)$, gde je $m$ broj polja koja trebaju da se popune. 
+    \par Minimalan broj polja koja moraju biti popunjena za $9\times9$ zagonetku je $17$, dakle, u najgorem slučaju se provera $9^{64}$ mogućnosti!
     
     \subsubsection{Optimizacija obrnute pretrage}
     Način na koji možemo optimizovati algoritam obrnute pretrage je da ubrzamo proveru da li se broj može postaviti na zadatoj poziciji. To ćemo postići tako što ćemo pamtiti
@@ -112,7 +112,7 @@
     Novi niz bitova \texttt{contain} ima $0$ na $i$-toj poziciji ako je moguće postaviti cifru $i+1$ na poziciju '(row, col)'. Na slici 3 vidimo da se u 
     redu nalaze brojevi 1,3,4,8 (010001101), koloni 7,9,6,2,1,8 (111100011) i u bloku 6,3,2,8 (010100110). Iz ovoga zaključujemo da je u polje (4,4)
     moguće upisati broj 5 (111101111).
-    \par Vremenska složenost je i dalje $\mathcal{O}(n^m)$, gde je $n$ dimenzija tabele, a $m$ broj polja koja trebaju da se popune, stim da je su sve provere da li se broj može upisati 
+    \par Vremenska složenost je i dalje $\mathcal{O}(n^m)$, gde je $m$ broj polja koja trebaju da se popune, stim da je su sve provere da li se broj može upisati 
     u polje svedene na $\mathcal{O}(m)$ za razliku od prethodnog algoritma koji ima složenost $\mathcal{O}(nm)$. 
     \par U Tabeli 1. vidimo da se prosečno vreme rešavanja duplo brže. Sam test je sproveden na 1000 tabela koja sadrže 25 popunjenih polja.
     \begin{table}[h]
@@ -287,8 +287,6 @@
         \item (\texttt{bool}) True ako je trenutna tabela validna.
     \end{itemize}
 
-
-
     \subsubsection{Funkcija članica za pronalaženje grešaka (CountErrors)}
     \texttt{int CountErrors(const Board\& original) const;}
     \par Prebrojava i ispisuje sve greške u tabeli.\\
@@ -317,7 +315,7 @@
     \end{itemize}
     
     \subsubsection{Statična funkcija članica za dobavljanja blocka (GetBlock)}
-    \texttt{static inline int GetBlock(int row, int col);}
+    \texttt{static constexpr int GetBlock(int row, int col);}
     \par Vraća blok u kome se nalazi polje '(row, col)'.\\
     Parametri:
     \begin{itemize}
@@ -329,11 +327,11 @@
         \item (\texttt{int}) Broj bloka u kome se nalazi polje (row, col)
     \end{itemize}
 
-    \subsubsection{Funkcija članica za generisanje elemenata na glavnoj dijagonali (GenerateDiagonal)}
+    \subsubsection{Funkcija članica za generisanje brojeva na glavnoj dijagonali (GenerateDiagonal)}
 	\texttt{void GenerateDiagonal();}
 	\par Generiše nasumično brojeve na glavnoj dijagonali.
 
-    \subsubsection{Funcija članica za generisanje ostalih elemenata (GenerateOther)}
+    \subsubsection{Funcija članica za generisanje ostalih brojeva (GenerateOther)}
     \texttt{bool GenerateOther(int row, int col);}
     \par Rekurzivno generiše nasumično brojeve koji se ne nalaze na glavnoj dijagonali.\\
 	Parametri:
@@ -346,12 +344,12 @@
         \item (\texttt{bool}) Zaustavlja rekurzivno generisanje tabele.
     \end{itemize}
 
-    \subsubsection{Funkcija članica za brisanje elemenata iz tabele (RemoveNumber)}
+    \subsubsection{Funkcija članica za brisanje brojeva iz tabele (RemoveNumber)}
 	\texttt{void RemoveNumber(int count);}
-    \par Nasumično briše $count$ brojeve iz tabele.\\
+    \par Nasumično briše $count$ brojeva iz tabele.\\
     Parametri:
     \begin{itemize}
-        \item (\texttt{int}) count - broj elemenate koliko se briše iz tabele.
+        \item (\texttt{int}) count - broj brojeva koliko se briše iz tabele.
     \end{itemize}
 
     \subsubsection{Funkcija članica za brojanje praznih polja (CountEmpty)}
@@ -450,10 +448,18 @@
     \subsection{Način testiranja}
     Implementacija se testira pomoću modula \texttt{Test}. Napravljeni su posebni testni skupovi (skupovi testnih slučajeva) za svaki modul, 
     a svaki testni skup sadrži testove (testne slučajeve, test cases) raznih segmenata tog modula - funkcija i struktura, kao i testiranje njihovih međusobnih odnosa.
-    \par Testovi se pokreću komandom \texttt{./sudoku -test}.
+    \par Testovi se pokreću komandom \texttt{./sudoku -test [test\_folder]}.\\
+    Opcionalni argument:
+    \begin{itemize}
+        \item $test\_folder$ - Folder u kome se nalaze testove. Podrazumeva vrednost je $../../Testovi$.
+    \end{itemize}
     \subsection{Funkcija za pokretanje}
-    \texttt{void TestRun();}
-    \par Pokreće sve testove.
+    \texttt{void TestRun(const string\& path);}
+    \par Pokreće sve testove.\\
+    Parametri:
+    \begin{itemize}
+        \item (\texttt{std::string\&}) path - Put ka folderu koji sadrži testove.
+    \end{itemize}
     \subsection{Pomoćna funkcija za poređenje tabela}
     {\parindent0pt
     \texttt{int CheckErrors(const std::string\& org, const std::string\& cmp);}

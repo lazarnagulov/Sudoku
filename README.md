@@ -31,9 +31,23 @@ In the console application, after the program generates a solution or loads one 
 ## Testing
 Tests are run with the command:
 ```bash
-./sudoku -test
+./sudoku -test [folder_name]
 ```
-Test folder is in:
+Optional argument:
+1. folder_name - Folder that contains all tests.
+
+Test files:
+- invalid_row.txt
+- invalid_column.txt
+- invalid_block.txt
+- valid.txt
+- original_changed.txt & error_changed.txt
+- original_column.txt & error_column.txt
+- original_row.txt & error_row.txt
+- original_block.txt & error_block.txt
+- original_all_[i].txt & error_all_[i].txt, for i ∈ [1, 3]
+
+Default test folder is:
 ```bash
 ../../Testovi
 ```
