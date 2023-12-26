@@ -28,7 +28,7 @@
         \includegraphics[width=0.5\textwidth, height=0.5\textwidth]{img/sudoku-example.jpg}
         \caption{Primer sudoku zagonetke}
     \end{figure}
-    \par Zagonetka ne mora da ima jedno rešenje, ali je standard da ga ima. Primer rešenje zagonetke sa slike 1:
+    \par Zagonetka ne mora da ima jedno rešenje. Primer rešenje zagonetke sa slike 1:
     \begin{figure}[h]
         \centering
         \includegraphics[width=0.5\textwidth, height=0.5\textwidth]{img/sudoku-example-sol.jpg}
@@ -176,7 +176,7 @@
     Provera validnosti unete zagonetke od strane korisnika je jednostavno - proverimo da li u svakom redu, koloni ili bloku postoje duplikati. 
     U slučaju da korisnik unosi rešenje, moramo dodatno da vodimo računa o promeni nepraznih vrednosti iz početne zagonetke.
     \par Svakim pronalaskom pogrešnog unetog broja, izbacujemo isti iz tabele. Tako\-đe vodimo računa da ne izbacimo broj koji je bio prisutan u početnoj tabeli i da isti brojevi nisu izmenjeni u rešenju.
-    Pošto se kroz matricu preće sa leva na desno, postoje dve mogućnosti:
+    Pošto se kroz matricu kreće sa leva na desno, postoje dve mogućnosti:
     \begin{enumerate}
         \item Naišli smo na broj koji je bio u prethodnoj tabeli i nije validan. Znamo da smo pre njega našli drugi broj koji nije validan zbog njega. Brišemo drugi broj.
         \item Naišli smo na broj koji nije bio u prethodnoj tabeli i nije validan, brišmo ga.
@@ -209,7 +209,7 @@
     \end{tabular}
     
     \subsubsection{Enumeracije}
-    \texttt{enum Difficulty;}
+    \texttt{enum class Difficulty;}
     \par Određuje težinu Sudoku zagonetke na osnovu broja izbrisanih polja. \\ 
     Vrednost: \texttt{EASY, MEDIUM, HARD, VERY\_HARD}
 
@@ -254,6 +254,12 @@
         \item (\texttt{Sudoku::Difficulty}) difficulty - enumeracija koja označava težinu zagonetke.
     \end{itemize}
    
+    \subsubsection{Operator ispisa}
+    {\parindent0pt
+    \texttt{std::ostream\& operator<<(std::ostream\& out, const Sudoku\& s);}
+    }
+    \par Ispisuje statistiku trenutne sudoke partije na standarni izlaz.
+
     \subsection{Modul Tabela (Board)}
     Modul koji sadrži pomoćne funkcije potrebne za menjanje trenutne tabele ili provere njene validnosti.
     \subsubsection{Konstante}
@@ -394,7 +400,7 @@
     \par Postavlja sva polja u tabeli na 0.
 
     \subsubsection{Funkcija za proveru da li je broj duplikat (IsDuplicate)}
-    \texttt{bool Board::IsDuplicate(int row, int col, PairArray\& buff);}\\
+    \texttt{bool IsDuplicate(int row, int col, PairArray\& buff);}\\
     Parametri:
     \begin{itemize}
         \item (\texttt{int}) row - Red u kome se polje nalazi.
@@ -523,7 +529,7 @@
     \begin{enumerate}
         \item Algoritam za rešavanje može da uzima (ali veoma retko) mnogo vremena za minimalno popunjene tabele (17 popunjenih polja).
         \item Generisanje tabele ne garantuje jedinstvenost rešenja zagonetke.
-        \item Brojenje grešaka favorizuje brojeve na koje prvo naiđe (uvek će se brisati duplikat koji ima veće pozicije).
+        \item Brojenje grešaka favorizuje brojeve na koje prvo naiđe (uvek će se brisati duplikat koji ima veću poziciju).
     \end{enumerate}
     \par Rešenje problema jedan je da uvek generišemo tabelu koja ima više od 17 popunjenih polja. Kroz testiranje primećeno je da se tako otklanja ovaj nedostatak, odnosno da se
     mnogo ređe pojavljuje. Takođe je moguće optimizovati brzinu rešavanja koristeći probalističke algoritme poput Knutovog algoritma iks (eng. Knuth's Algorithm X). Primetimo da navedeni algoritam
@@ -537,6 +543,8 @@
     dodatne optimizacije. Iako je vrednost veličine tabele 9, moguće je generisati i rešavati i veće tabele, izmenom konstanti \texttt{BOARD\_SIZE} i \texttt{BLOCK\_SIZE}, stim
     da važi $\texttt{BLOCK\_SIZE} \in \mathbb{N} \land \texttt{BLOCK\_SIZE} = \sqrt{\texttt{BOARD\_SIZE}}$, odnosno veličina tabele mora biti potpun kvadrat da bi zagonetka imala smisla.
     \par Rezultati merenja iz Tabele 1 pokazuju znatno ubrzanje, naručito za tabele koje imaju više praznih polja. Ovo je manje primetno za tabele koje imaju 
-    manji broj praznih polja, jer je veća verovatnoća da uobičajna pretraga brzo pronađe duplikate. 
+    manji broj praznih polja, jer je veća verovatnoća da uobičajna pretraga brzo pronađe duplikate. Sve mogućnosti za dodatne optimizacije zahtevaju dodatno zauzimanje memorije. 
+    \par Cilj nam je bio da prikažemo jednostavno rešenje i primer kako se 
+    se određena optimizacija može implementirati.
     \newpage
 \end{document}
