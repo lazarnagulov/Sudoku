@@ -1,4 +1,4 @@
-/// File: Sudoku.h
+/// Sudoku.h
 /// 
 /// Declarations of Sudoku class.   
 /// Contains a main game functions such as Run, Solve, Generate.

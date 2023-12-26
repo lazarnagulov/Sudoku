@@ -175,7 +175,7 @@ int Board::CountErrors(const Board& original) {
 				int& current = At(row, col);
 				int idx = current - 1;
 				if (IsDuplicate(row, col, buff)) {
-					std::cerr << "Error: Duplicate number " << At(row, col) << "found in block " << block
+					std::cerr << "Error: Duplicate number " << At(row, col) << " found in block " << block << " ("
 						<< buff[idx].first << "," << buff[idx].second 
 						<< ") and (" << row << ',' << col << ")" << std::endl;
 					++result;

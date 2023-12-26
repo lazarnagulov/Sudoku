@@ -110,8 +110,6 @@ void Sudoku::CheckSolution() {
     wrongCount = loaded.CountErrors(board);
     
     correctCount = total - wrongCount - emptyCount  - clues;
-
-    std::cout << *this << std::endl;
 }
 
 /*
