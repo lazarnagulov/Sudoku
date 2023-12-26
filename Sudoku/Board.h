@@ -3,12 +3,14 @@
 /// Declarations for the Board class, which includes member functions for generating and solving Sudoku puzzles.
 /// 
 /// Author: Lazar Nagulov
-/// Last modified: 25rd December 2023
+/// Last modified: 26th December 2023
 
 #pragma once
 #include <iostream>
+#include <unordered_set>
 #include <bitset>
 #include <array>
+#include <random>
 #include <fstream>
 
 class Board {
@@ -94,7 +96,7 @@ public:
 	/// <param name="row">Row index of the cell.</param>
 	/// <param name="col">Column index of the cell.</param>
 	/// <returns>The block index for the specified cell position.</returns>
-	static inline int GetBlock(int row, int col);
+	static constexpr int GetBlock(int row, int col);
 
 	/// <summary>
 	/// Provides read-only access to the value at the specified cell in the board.

@@ -3,12 +3,7 @@
 /// Definitions of Board class.
 /// 
 ///	Author: Lazar Nagulov 
-/// Last modified: 25rd December 2023
-
-#include <unordered_set>
-#include <array>
-#include <bitset>
-#include <random>
+/// Last modified: 26th December 2023
 
 #include "Board.h"
 
@@ -65,7 +60,7 @@ bool Board::IsValid() const {
 	return true;
 }
 
-inline int Board::GetBlock(int row, int col) {
+constexpr int Board::GetBlock(int row, int col) {
 	return (row / Board::BLOCK_SIZE) * Board::BLOCK_SIZE + col / Board::BLOCK_SIZE;
 }
 
