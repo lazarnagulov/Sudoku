@@ -26,10 +26,10 @@ static int CheckErrors(const std::string& originalFile, const std::string& compa
 }
 
 /// Tests board validation
-std::string TestInvalidColumn() {
+std::string TestInvalidColumn(const std::string& testFolder) {
 	std::string result;
 
-	std::string inputFile("../../Testovi/invalid_column.txt");
+	std::string inputFile(testFolder + "/invalid_column.txt");
 	std::ifstream in(inputFile);
 	Board b;
 	in >> b;
@@ -42,10 +42,10 @@ std::string TestInvalidColumn() {
 		return "Fail";
 	}
 }
-std::string TestInvalidRow() {
+std::string TestInvalidRow(const std::string& testFolder) {
 	std::string result;
 
-	std::string inputFile("../../Testovi/invalid_row.txt");
+	std::string inputFile(testFolder + "/invalid_row.txt");
 	std::ifstream in(inputFile);
 	Board b;
 	in >> b;
@@ -59,10 +59,10 @@ std::string TestInvalidRow() {
 		return "Fail";
 	}
 }
-std::string TestInvalidBlock() {
+std::string TestInvalidBlock(const std::string& testFolder) {
 	std::string result;
 
-	std::string inputFile("../../Testovi/invalid_block.txt");
+	std::string inputFile(testFolder + "/invalid_block.txt");
 	std::ifstream in(inputFile);
 	Board b;
 	in >> b;
@@ -75,12 +75,9 @@ std::string TestInvalidBlock() {
 		return "Fail";
 	}
 }
-std::string TestPossibleMoves() {
-	return "Pass";
-}
 
-std::string TestValid() {
-	std::string inputFile("../../Testovi/valid.txt");
+std::string TestValid(const std::string& testFolder) {
+	std::string inputFile(testFolder + "/valid.txt");
 	std::ifstream in(inputFile);
 	Board b;
 	in >> b;
@@ -96,8 +93,8 @@ std::string TestValid() {
 }
 
 /// Tests board error counting
-std::string TestChangedValue() {
-	int wrong = CheckErrors("../../Testovi/original_changed.txt", "../../Testovi/error_changed.txt");
+std::string TestChangedValue(const std::string& testFolder) {
+	int wrong = CheckErrors(testFolder + "/original_changed.txt", testFolder + "/error_changed.txt");
 	std::cout << "Total errors: " << wrong << std::endl;
 	if (wrong != 3) {
 		return "Fail - Expected wrong count to be 3 but got " + std::to_string(wrong) + ".";
@@ -105,8 +102,8 @@ std::string TestChangedValue() {
 	return "Pass";
 }
 
-std::string TestRow() {
-	int wrong = CheckErrors("../../Testovi/original_row.txt", "../../Testovi/error_row.txt");
+std::string TestRow(const std::string& testFolder) {
+	int wrong = CheckErrors(testFolder + "/original_row.txt", testFolder + "/error_row.txt");
 	std::cout << "Total errors: " << wrong << std::endl;
 	if (wrong != 4) {
 		return "Fail - Expected wrong count to be 4 but got " + std::to_string(wrong) + ".";
@@ -115,8 +112,8 @@ std::string TestRow() {
 	return "Pass";
 }
 
-std::string TestColumn() {
-	int wrong = CheckErrors("../../Testovi/original_column.txt", "../../Testovi/error_column.txt");
+std::string TestColumn(const std::string& testFolder) {
+	int wrong = CheckErrors(testFolder + "/original_column.txt", testFolder + "/error_column.txt");
 	std::cout << "Total errors: " << wrong << std::endl;
 	if (wrong != 4) {
 		return "Fail - Expected wrong count to be 4 but got " + std::to_string(wrong) + ".";
@@ -125,8 +122,8 @@ std::string TestColumn() {
 	return "Pass";
 }
 
-std::string TestBlock() {
-	int wrong = CheckErrors("../../Testovi/original_block.txt", "../../Testovi/error_block.txt");
+std::string TestBlock(const std::string& testFolder) {
+	int wrong = CheckErrors(testFolder + "/original_block.txt", testFolder + "/error_block.txt");
 	std::cout << "Total errors: " << wrong << std::endl;
 	if (wrong != 2) {
 		return "Fail - Expected wrong count to be 2 but got " + std::to_string(wrong) + ".";
@@ -135,20 +132,20 @@ std::string TestBlock() {
 	return "Pass";
 }
 
-std::string TestErrorCountAll() {
-	int wrong = CheckErrors("../../Testovi/original_all_1.txt", "../../Testovi/error_all_1.txt");
+std::string TestErrorCountAll(const std::string& testFolder) {
+	int wrong = CheckErrors(testFolder + "/original_all_1.txt", testFolder + "/error_all_1.txt");
 	std::cout << "Total errors: " << wrong << std::endl;
 	if (wrong != 4) {
 		return "Fail - Expected wrong count to be 4 but got " + std::to_string(wrong) + ".";
 	}
 
-	wrong = CheckErrors("../../Testovi/original_all_2.txt", "../../Testovi/error_all_2.txt");
+	wrong = CheckErrors(testFolder + "/original_all_2.txt", testFolder + "/error_all_2.txt");
 	std::cout << "Total errors: " << wrong << std::endl;
 	if (wrong != 4) {
 		return "Fail - Expected wrong count to be 4 but got " + std::to_string(wrong) + ".";
 	}
 
-	wrong = CheckErrors("../../Testovi/original_all_3.txt", "../../Testovi/error_all_3.txt");
+	wrong = CheckErrors(testFolder + "/original_all_3.txt", testFolder + "/error_all_3.txt");
 	std::cout << "Total errors: " << wrong << std::endl;
 	if (wrong != 3) {
 		return "Fail - Expected wrong count to be 3 but got " + std::to_string(wrong) + ".";
@@ -170,54 +167,55 @@ std::string TestGenerateAndSolve() {
 }
 
 
-void TestRun() {
+void TestRun(const std::string& path) {
 	std::string result;
+
 	std::cout << "-----" << std::endl;
 
 	std::cout << "TestValid" << std::endl;
 	std::cout << "-----" << std::endl;
-	result = TestValid();
+	result = TestValid(path);
 	std::cout << ">>>> " << result << " <<<<" << std::endl;
 
 	std::cout << "TestInvalidColumn" << std::endl;
 	std::cout << "-----" << std::endl;
-	result = TestInvalidColumn();
+	result = TestInvalidColumn(path);
 	std::cout << "-----" << std::endl;
 	std::cout << ">>>> " << result << " <<<<" << std::endl;
 
 	std::cout << "TestInvalidRow" << std::endl;
 	std::cout << "-----" << std::endl;
-	result = TestInvalidRow();
+	result = TestInvalidRow(path);
 	std::cout << ">>>> " << result << " <<<<" << std::endl;
 
 	std::cout << "TestInvalidBlock" << std::endl;
 	std::cout << "-----" << std::endl;
-	result = TestInvalidBlock();
+	result = TestInvalidBlock(path);
 	std::cout << ">>>> " << result << " <<<<" << std::endl;
 
 	std::cout << "TestChangedValue" << std::endl;
 	std::cout << "-----" << std::endl;
-	result = TestChangedValue();
+	result = TestChangedValue(path);
 	std::cout << ">>>> " << result << " <<<<" << std::endl;
 
 	std::cout << "TestRow" << std::endl;
 	std::cout << "-----" << std::endl;
-	result = TestRow();
+	result = TestRow(path);
 	std::cout << ">>>> " << result << " <<<<" << std::endl;
 
 	std::cout << "TestColumn" << std::endl;
 	std::cout << "-----" << std::endl;
-	result = TestColumn();
+	result = TestColumn(path);
 	std::cout << ">>>> " << result << " <<<<" << std::endl;
 
 	std::cout << "TestBlock" << std::endl;
 	std::cout << "-----" << std::endl;
-	result = TestBlock();
+	result = TestBlock(path);
 	std::cout << ">>>> " << result << " <<<<" << std::endl;
 
 	std::cout << "TestErrorCountAll" << std::endl;
 	std::cout << "-----" << std::endl;
-	result = TestErrorCountAll();
+	result = TestErrorCountAll(path);
 	std::cout << ">>>> " << result << " <<<<" << std::endl;
 
 	std::cout << "TestGenerateAndSolve" << std::endl;
