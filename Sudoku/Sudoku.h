@@ -4,11 +4,8 @@
 /// Contains a main game functions such as Run, Solve, Generate.
 /// 
 ///	Author: Lazar Nagulov 
-/// Last modified: 25rd December 2023
+/// Last modified: 26th December 2023
 #pragma once
-#include <fstream>
-#include <bitset>
-
 #include "Board.h"
 
 class Sudoku {

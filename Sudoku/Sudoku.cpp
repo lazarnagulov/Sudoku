@@ -3,15 +3,9 @@
 /// Definitions for the Sudoku class, the main class operating with the Board class and providing a user interface.
 /// 
 /// Author: Lazar Nagulov
-/// Last modified: 25th December 2023
+/// Last modified: 26th December 2023
 
-#include <array>
-#include <bitset>
-#include <string>
-#include <exception>
-
-#include "Sudoku.h"5
-#include "Timer.h"
+#include "Sudoku.h"
 
 
 Sudoku::Sudoku(const std::string& inputFile, const std::string& outputFile)
@@ -151,24 +145,48 @@ bool Sudoku::Solve() {
         }
     }
 
-    board.Backtrack(rowSet, colSet, blockSet);
+    int total = Board::BOARD_SIZE * Board::BOARD_SIZE;
+    int clues = total - board.CountEmpty();
 
-    if (!board.IsValid()) {
-        std::cerr << "Error: Could not solve the puzzle!" << std::endl;
+    board.Backtrack(rowSet, colSet, blockSet);
+    
+    wrongCount = board.CountErrors(board);
+    correctCount = total - clues;
+    
+    if (wrongCount != 0) {
         return false;
     }
- 
+    
     std::ofstream out(outputFile);
     out << board;
     out.close();
     return true;
 }
 
+
+static int GetNextDifficulty(Sudoku::Difficulty difficulty) {
+    switch (difficulty) {
+    case Sudoku::Difficulty::EASY:
+        return static_cast<int>(Sudoku::Difficulty::MEDIUM);
+        break;
+    case Sudoku::Difficulty::MEDIUM:
+        return static_cast<int>(Sudoku::Difficulty::HARD);
+    case Sudoku::Difficulty::HARD:
+        return static_cast<int>(Sudoku::Difficulty::VERY_HARD);
+    default:
+        return 61;
+    }
+}
+
 void Sudoku::Generate(Difficulty difficulty) {
+    int next = GetNextDifficulty(difficulty);
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution<std::mt19937::result_type> random(static_cast<int>(difficulty), next);
     board.Clear();
     board.GenerateDiagonal();
     board.GenerateOther(0,0);
-    board.RemoveNumber(static_cast<int>(difficulty));
+    board.RemoveNumber(random(rng));
 }
 
 /// <summary>
