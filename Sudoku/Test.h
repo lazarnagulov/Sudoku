@@ -1,9 +1,9 @@
-/// File: Test.h
+/// Test.h
 /// 
 /// Definitions of Tests.
 /// 
 ///	Author: Lazar Nagulov 
-/// Last modified: 23rd December 2023.
+/// Last modified: 25th December 2023.
 
 #pragma once
 #include <string>

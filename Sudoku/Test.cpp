@@ -1,3 +1,10 @@
+/// Test.cpp
+/// 
+/// Test implementations.
+/// 
+///	Author: Lazar Nagulov 
+/// Last modified: 25th December 2023.
+
 #include "Test.h"
 
 
