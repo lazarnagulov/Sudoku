@@ -73,6 +73,8 @@ void Sudoku::SolvingOptions() {
         }
         else if (ans == 2) {
             Solve();
+            std::cout << "Solution:" << std::endl;
+            std::cout << board << std::endl;
             break;
         }
         else if (ans == 3) {
@@ -83,8 +85,6 @@ void Sudoku::SolvingOptions() {
             std::cerr << "Invalid command" << std::endl;
         }
     } while (true);
-    std::cout << "Solution:" << std::endl;
-    std::cout << board << std::endl;
     std::cout << *this << std::endl;
     ++currentRound;
 }
@@ -105,25 +105,6 @@ void Sudoku::CheckSolution() {
     
     correctCount = total - wrongCount - emptyCount  - clues;
 }
-
-/*
-static bool Backtrack(Board& board) {
-    int row, col;
-    if (!board.FindEmpty(row, col)) {
-        return true;
-    }
-    for (int number = 1; number <= Board::BOARD_SIZE; ++number) {
-        if (board.IsPossibleMove(row, col, number)) {
-            board(row, col) = number;
-            if (Backtrack(board)) {
-                return true;
-            }
-            board(row, col) = Board::EMPTY;
-        }
-    }
-    return false;
-}
-*/
 
 bool Sudoku::Solve() {
     Board::BitArray rowSet;

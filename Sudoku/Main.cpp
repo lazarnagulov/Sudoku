@@ -23,6 +23,10 @@ int main(int argc, char** argv) {
 	if (strcmp(argv[1], "-test") == 0) {
 		std::cout << "Testing:" << std::endl;
 		if (argc == 3) {
+			if (!std::filesystem::exists(argv[2])) {
+				std::cerr << "Error: Test folder path " << argv[2] << " is invalid!" << std::endl;
+				return 1;
+			}
 			TestRun(std::string(argv[2]));
 		}
 		else {
